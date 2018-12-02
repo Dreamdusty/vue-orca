@@ -47,7 +47,8 @@ exports.cssLoaders = function (options) {
     if (options.extract) {
       return ExtractTextPlugin.extract({
         use: loaders,
-        fallback: 'vue-style-loader'
+        fallback: 'vue-style-loader',
+        publicPath: '../../'
       })
     } else {
       return ['vue-style-loader'].concat(loaders)
@@ -60,7 +61,20 @@ exports.cssLoaders = function (options) {
     postcss: generateLoaders(),
     less: generateLoaders('less'),
     sass: generateLoaders('sass', { indentedSyntax: true }),
-    scss: generateLoaders('sass'),
+    // scss: generateLoaders('sass'),
+    // 全局样式文件引入，在所有的.vue文件都可以用到这份css样式
+    // 需要引入多个文件
+    // 1、在resources数组里增加scss文件路径。
+    // 2、在index.scss文件里用@import引入其他scss文件。
+    scss: generateLoaders('sass').concat(
+      {
+        loader: 'sass-resources-loader',
+        options: {
+          // resources接受一个数组，可以添加多个scss文件
+          resources: [path.resolve(__dirname, '../src/assets/scss/index.scss')] // 这里按照文件路径填写
+        }
+      }
+    ),
     stylus: generateLoaders('stylus'),
     styl: generateLoaders('stylus')
   }
