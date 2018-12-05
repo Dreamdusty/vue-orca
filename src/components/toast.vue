@@ -12,8 +12,9 @@
   .wrap{
     position: fixed;
     left: 50%;
-    top: 55%;
-    background: rgba(0,0,0,.35);
+    top: 60%;
+    /*rgba(0,0,0,.35)*/
+    background: #1a344b;
     padding: 10px;
     border-radius: 5px;
     transform: translate(-50%,-50%);

@@ -23,7 +23,7 @@
         ></XInput>
       </Group>
       <XButton
-        type="primary"
+        type="default"
         class="login"
         @click.native="handleLogin"
         :disabled="disabled"
@@ -33,9 +33,9 @@
 </template>
 
 <script>
-  // type="text/ecmascript-6"
   import { Group, XInput, XButton } from 'vux'
   import { userLogin } from '/api/api'
+
   export default {
     name: "login",
     data() {
@@ -74,41 +74,15 @@
       },
       handleLogin() {
         userLogin({username: this.account, password: this.password}).then(res => {
-          // console.log(res.data);
           if (res.data.code !== 200) {
             // this.$vux.toast.show({
             //   text: 'text',
             // })
             this.$toast(res.data.message);
           } else {
-            this.$router.push('/home');
+            this.$router.push('/cruise');
           }
         });
-        // this.$vux.toast.show({
-        //   type: 'text',
-        //   text: '',
-        //   position: 'bottom',
-        //   font: red,
-        // })
-
-            // this.$post('m/login',this.account).then(res => {
-            //   this.logining = false;
-            //   if(res.errCode !== 200) {
-            //     this.$message({
-            //       message: res.errMsg,
-            //       type:'error'
-            //     });
-            //   } else {
-            //     let expireDays = 1000 * 60 * 60 ;
-            //     this.setCookie('session',res.errData.token,expireDays); //设置Session
-            //     this.setCookie('u_uuid',res.errData.u_uuid,expireDays); //设置用户编号
-            //     if(this.$route.query.redirect) {
-            //       this.$router.push(this.$route.query.redirect);
-            //     } else {
-            //       this.$router.push('/home'); //跳转用户中心页
-            //     }
-            //   }
-            // });
       }
     },
     components: {

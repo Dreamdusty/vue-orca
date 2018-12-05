@@ -1,10 +1,10 @@
 <template>
-
+  <h1>Clean</h1>
 </template>
 
 <script>
   export default {
-    name: "drawer",
+    name: "clean"
   }
 </script>
 

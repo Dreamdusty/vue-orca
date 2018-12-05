@@ -1,5 +1,5 @@
 import vue from 'vue'
-import toastComponent from '/common/toast'
+import toastComponent from '/components/toast'
 
 // 返回一个扩展实例构造器，官方文档 https://cn.vuejs.org/v2/api/#Vue-extend
 const ToastConstructor = vue.extend(toastComponent);

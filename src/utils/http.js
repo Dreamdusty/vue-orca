@@ -1,5 +1,4 @@
 import axios from 'axios'
-import { getCookie } from './cookie'
 
 // axios 配置
 
@@ -11,15 +10,10 @@ axios.defaults.withCredentials = true;
 // http request 拦截器
 axios.interceptors.request.use(
   config => {
-    const token = getCookie('AppCookieToken');
     config.data = JSON.stringify(config.data);
     config.headers = {
       'Content-Type': 'application/json; charset=utf-8',
     };
-    if (token) {
-      // 后台接收的参数
-      config.params = {'token': token}
-    }
     return config;
   },
   err => {
@@ -30,19 +24,19 @@ axios.interceptors.request.use(
 // http response 拦截器
 axios.interceptors.response.use(
   response => {
-    // Cookie丢失，然后跳转到登录页
-    console.log(response);
-    if(response.code === 401) {
-      router.push({
-        path: '/login',
-        // 从哪个页面跳转
-        query: {redirect: router.currentRoute.fullPath}
-      })
-    }
     return response;
   },
   error => {
-    return Promise.reject(error.response.data)
+    // if (error.response) {
+    //   switch (error.response.status) {
+    //     case 401:
+    //       this.$router.replace({
+    //         path: '/',
+    //         query: {redirect: router.currentRoute.fullPath}
+    //       });
+    //   }
+    // }
+    return Promise.reject(error.response.data);
   });
 
 export default axios;
