@@ -7,7 +7,8 @@
       :tran="tran"
       @change-show="changeDrawerShow"
       @on-hide="onHide"
-      @on-show="onShow">
+      @on-show="onShow"
+      v-if="path !== '/'">
       <!-- drawer content -->
       <div slot="drawer" class="drawer">
         <div class="head">
@@ -86,6 +87,7 @@
         drawerShow: false,
         path: '',
         items: [],
+        paths: [],
       }
     },
     mounted () {
@@ -110,13 +112,14 @@
           this.items.push({
             name: route.name,
             path: route.path,
-          })
+          });
+          this.paths.push(route.path);
         })
       },
     },
     watch: {
       '$route' (to, from) {
-        console.log(this.items);
+        console.log(...this.paths);
         this.path = to.path;
         if (this.path === '/' && getCookie("AppCookieToken")) {
           this.$router.push({
