@@ -4,10 +4,10 @@ import { post, fetch, del, put } from '@/utils/http'
 import { delCookie, getCookie } from '@/utils/cookie'
 
 const Index = resolve => require(['/views/login'], resolve); // 登录
-// const Home = resolve => require(['/views/home'], resolve); // 主页
-const Cruise = resolve => require(['/views/cruise/cruise'], resolve); // 自主巡航
-const Clean = resolve => require(['/views/clean/clean'], resolve); // 智慧清洁
-const Detect = resolve => require(['/views/detect/detect'], resolve); // 水质监测
+const Home = resolve => require(['/views/home'], resolve); // 主页
+// const Cruise = resolve => require(['/views/cruise/cruise'], resolve); // 自主巡航
+// const Clean = resolve => require(['/views/clean/clean'], resolve); // 智慧清洁
+// const Detect = resolve => require(['/views/detect/detect'], resolve); // 水质监测
 
 Vue.use(Router);
 
@@ -21,53 +21,60 @@ const routes = [
     }
   },
   {
-    path: '/cruise',
-    name: 'cruise',
-    component: Cruise,
-    meta: { requireAuth: true },
-    // redirect: '/cruise',
-    iconCls: '', // 图标
-    // children: [
-    //   {
-    //     path: '/cruise',
-    //     name: 'cruise',
-    //     component: Cruise,
-    //     meta: { requireAuth: false },
-    //   },
-    // ]
+    path: '/home',
+    name: 'home',
+    component: Home,
+    meta: { requireAuth: false },
+    iconCls: '',
   },
-  {
-    path: '/clean',
-    name: 'clean',
-    component: Clean,
-    meta: { requireAuth: true },
-    // redirect: '/clean',
-    iconCls: '', // 图标
-    // children: [
-    //   {
-    //     path: '/clean',
-    //     name: 'clean',
-    //     component: Clean,
-    //     meta: { requireAuth: true }
-    //   },
-    // ]
-  },
-  {
-    path: '/detect',
-    name: 'detect',
-    component: Detect,
-    meta: { requireAuth: true },
-    // redirect: '/detect',
-    iconCls: '', // 图标
-    // children: [
-    //   {
-    //     path: '/detect',
-    //     name: 'detect',
-    //     component: Detect,
-    //     meta: { requireAuth: true }
-    //   },
-    // ]
-  },
+  // {
+  //   path: '/cruise',
+  //   name: 'cruise',
+  //   component: Cruise,
+  //   meta: { requireAuth: false },
+  //   // redirect: '/cruise',
+  //   iconCls: '', // 图标
+  //   // children: [
+  //   //   {
+  //   //     path: '/cruise',
+  //   //     name: 'cruise',
+  //   //     component: Cruise,
+  //   //     meta: { requireAuth: false },
+  //   //   },
+  //   // ]
+  // },
+  // {
+  //   path: '/clean',
+  //   name: 'clean',
+  //   component: Clean,
+  //   meta: { requireAuth: false },
+  //   // redirect: '/clean',
+  //   iconCls: '', // 图标
+  //   // children: [
+  //   //   {
+  //   //     path: '/clean',
+  //   //     name: 'clean',
+  //   //     component: Clean,
+  //   //     meta: { requireAuth: true }
+  //   //   },
+  //   // ]
+  // },
+  // {
+  //   path: '/detect',
+  //   name: 'detect',
+  //   component: Detect,
+  //   meta: { requireAuth: false },
+  //   // redirect: '/detect',
+  //   iconCls: '', // 图标
+  //   // children: [
+  //   //   {
+  //   //     path: '/detect',
+  //   //     name: 'detect',
+  //   //     component: Detect,
+  //   //     meta: { requireAuth: true }
+  //   //   },
+  //   // ]
+  // },
 ];
 
 const router = new Router({

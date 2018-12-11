@@ -42,23 +42,26 @@
         <div class="view">
           <router-view :webUrl="webUrl"></router-view>
         </div>
-        <tabbar icon-class="vux-center" slot="bottom">
-          <tabbar-item selected show-dot link="/cruise">
-            <!--<router-link to="/cruise"></router-link>-->
+        <tabbar icon-class="vux-center" slot="bottom"> <!-- v-show="" -->
+          <tabbar-item show-dot @on-item-click="cruiseShowToggle">
+            <cruise :cruiseShow="cruiseShow"></cruise>
             <img slot="icon" src="./assets/logo.png" alt=""/>
             <span slot="label">自主巡航</span>
           </tabbar-item>
-          <tabbar-item link="/clean">
+          <tabbar-item @click.native="cleanShowToggle">
+            <clean :msgShow="cleanShow"></clean>
             <img slot="icon" src="./assets/logo.png" alt=""/>
             <span slot="label">智慧清洁</span>
           </tabbar-item>
-          <tabbar-item badge="2" link="/detect">
+          <tabbar-item badge="2" @click.native="detectShowToggle">
+            <detect :msgShow="detectShow"></detect>
             <img slot="icon" src="./assets/logo.png" alt=""/>
             <span slot="label">水质监测</span>
           </tabbar-item>
         </tabbar>
       </view-box>
     </drawer>
+    <cruise></cruise>
   </div>
 </template>
 
@@ -66,6 +69,9 @@
   import { ViewBox, XHeader, Tabbar, TabbarItem, Group, Cell } from 'vux'
   import Drawer from '@/components/drawer.vue'
   import { getCookie } from '@/utils/cookie'
+  import cruise from './common/cruise'
+  import clean from './common/clean'
+  import detect from './common/detect'
   // import Bus from '@/assets/js/bus.js'
 
   export default {
@@ -78,24 +84,39 @@
       TabbarItem,
       Group,
       Cell,
+      cruise,
+      clean,
+      detect,
     },
     data() {
       return {
         webUrl: "",
-        pos: 'left',   // 侧边栏从那边划入
-        tran: 'overlay',   // 默认：overlay 展示方式:push(推开内容区域), overlay(在内容上显示)
+        pos: 'left', // 侧边栏从那边划入
+        tran: 'overlay', // 默认：overlay 展示方式:push(推开内容区域), overlay(在内容上显示)
         drawerShow: false,
         path: '',
         items: [],
         paths: [],
+        cruiseShow: false,
+        cleanShow: false,
+        detectShow: false,
       }
     },
-    mounted () {
+    mounted() {
       this.created();
     },
     methods: {
       drawerToggle() {
         this.drawerShow = !this.drawerShow
+      },
+      cruiseShowToggle() {
+        this.$store.dispatch('changeShow').then();
+      },
+      cleanShowToggle() {
+        this.cleanShow = !this.cleanShow
+      },
+      detectShowToggle() {
+        this.detectShow = !this.detectShow
       },
       onHide() {
         console.log('hide');
@@ -129,73 +150,75 @@
         }
 
         console.log(from);
-        this.drawerShow = false;   // 路由跳转、关闭侧边栏
-        // from.drawerToggle()
+        this.drawerShow = false; // 路由跳转、关闭侧边栏
       }
     },
   }
 </script>
 
-<style lang="less">
+<style scoped lang="less">
   html {
-    height: 100%;
+    height: 100% !important;
   }
   body {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    overflow-x: hidden;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 100% !important;
+    overflow-x: hidden !important;
   }
   #app {
-    color: #2c3e50;
-    width: 100%;
-    height: 100%;
-    font-family: Source Sans Pro, Helvetica, "microsoft yahei", sans-serif;
+    color: #2c3e50 !important;
+    width: 100% !important;
+    height: 100% !important;
+    font-family: Source Sans Pro, Helvetica, "microsoft yahei", sans-serif !important;
+    /*position: absolute !important;*/
   }
   .over {
-    fill: #fff;
-    position: relative;
-    top: -8px;
-    left: -3px;
+    fill: #fff !important;
+    position: relative !important;
+    top: -8px !important;
+    left: -3px !important;
   }
   .avatar {
-    width:1rem;
-    height:1rem;
-    overflow: hidden;
-    border-radius: 50%;
-    margin-left: 0.15rem;
+    width:1rem !important;
+    height:1rem !important;
+    overflow: hidden !important;
+    border-radius: 50% !important;
+    margin-left: 0.15rem !important;
     .img {
-      width: 1rem; /* 130/75 */
-      height: 1rem; /* 130/75 */
+      width: 1rem !important; /* 130/75 */
+      height: 1rem !important; /* 130/75 */
     }
   }
   .drawer {
-    background-color: #efefef;
-    height: 100%;
+    background-color: #efefef !important;
+    height: 100% !important;
+    z-index: 999 !important;
+    /*position: fixed !important;*/
     .top {
-      margin-top: -0.2rem;
+      margin-top: -0.2rem !important;
     }
   }
   .head {
-    background: url("./assets/background1.jpg");
-    height: 2.2rem; /* 260/75 */
-    width: 250px;
-    max-width: 250px;
-    background-size: 4rem 2.2rem; /* 260/75 */
-    padding-top: 0.2rem;
-    box-sizing: border-box;
+    background: url("./assets/background.png") !important;
+    height: 2.2rem !important; /* 260/75 */
+    width: 250px !important;
+    max-width: 250px !important;
+    background-size: 4.5rem 2.2rem !important;
+    padding-top: 0.2rem !important;
+    box-sizing: border-box !important;
   }
   .login {
-    color: white;
-    margin-top: 0.1rem;
+    color: white !important;
+    margin-top: 0.1rem !important;
     .log1 {
-      font-size: 0.25rem;
-      margin-left: 0.15rem;
+      font-size: 0.25rem !important;
+      margin-left: 0.15rem !important;
     }
     .log2 {
-      font-size: 0.23rem;
-      margin-left: 0.15rem;
+      font-size: 0.23rem !important;
+      margin-left: 0.15rem !important;
     }
   }
 </style>

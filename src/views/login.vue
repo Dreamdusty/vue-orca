@@ -73,16 +73,16 @@
         this.disabled = !(this.$refs.refUser.valid === true && this.$refs.refPass.valid === true && this.account !== '' && this.password !== '');
       },
       handleLogin() {
-        userLogin({username: this.account, password: this.password}).then(res => {
-          if (res.data.code !== 200) {
-            // this.$vux.toast.show({
-            //   text: 'text',
-            // })
-            this.$toast(res.data.message);
-          } else {
-            this.$router.push('/cruise');
-          }
-        });
+        // userLogin({username: this.account, password: this.password}).then(res => {
+        //   if (res.data.code !== 200) {
+        //     // this.$vux.toast.show({
+        //     //   text: 'text',
+        //     // })
+        //     this.$toast(res.data.message);
+        //   } else {
+            this.$router.push('/home');
+          // }
+        // });
       }
     },
     components: {

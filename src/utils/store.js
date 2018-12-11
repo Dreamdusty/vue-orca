@@ -4,24 +4,28 @@ import Vuex from 'vuex'
 Vue.use(Vuex);
 
 const state = {
-  drawerOpened: false,
+  show: false,
 };
 
 export default new Vuex.Store({
   state,
   getters: {
-    drawer: state => {
-      return state.drawerOpened // 让外界能获取 drawerOpened
+    changeShow: state => {
+      return state.show // 让外界能获取 show
     }
   },
   mutations: {
-    changeDrawer (state) { // 让外界能改变drawerOpened
-      state.drawerOpened = !state.drawerOpened
+    changeShow (state, value) { // 让外界能改变 show
+      if (value !== undefined) {
+        state.show = value
+      } else {
+        state.show = !state.show
+      }
     }
   },
-  actions: { // 让外界能通过异步调用的方式 改变drawerOpened
-    changeDrawer ({commit}) {
-      commit('changeDrawer')
+  actions: { // 让外界能通过异步调用的方式 改变 show
+    changeShow ({commit}) {
+      commit('changeShow')
     }
   }
-})
+});

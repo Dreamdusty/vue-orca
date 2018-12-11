@@ -24,6 +24,7 @@ const webpackConfig  = {
   resolve: {
     extensions: ['.js', '.vue', '.json', 'less'],
     alias: {
+      // 'vue': 'vue/dist/vue.js',
       'vue$': 'vue/dist/vue.esm.js',
       '@': resolve('src'),
       '/api': resolve('src/api'),
@@ -95,7 +96,11 @@ const webpackConfig  = {
     net: 'empty',
     tls: 'empty',
     child_process: 'empty'
-  }
+  },
+  // externals: {
+  //   'AMap': 'window.AMap',
+  //   'AMapUI': 'window.AMapUI',
+  // }
 };
 
 let lessTheme = {

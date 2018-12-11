@@ -1,16 +1,28 @@
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
+import VueAMap from 'vue-amap'
 import MintUI from 'mint-ui'
 import 'mint-ui/lib/style.css'
 import App from './App'
 import router from './router/index'
 import { ToastPlugin } from 'vux'
 import toastMessages from './utils/toast'
+import store from './utils/store'
 
+Vue.use(VueAMap);
 Vue.use(MintUI);
 Vue.use(ToastPlugin);
 Vue.use(toastMessages);
+
+VueAMap.initAMapApiLoader({
+  key: '87f1af7c4b4d86a7bd13155c3bc4ac31',
+  plugin: ['AMap.ToolBar'],
+  // 默认高德 sdk 版本为 1.4.4
+  v: '1.4.11',
+  // 高德 UI 组件库版本号
+  uiVersion: '1.0.11'
+});
 
 Vue.config.productionTip = false;
 
@@ -22,5 +34,6 @@ new Vue({
   el: '#app',
   router,
   components: { App },
-  template: '<App/>'
+  template: '<App/>',
+  store
 });
