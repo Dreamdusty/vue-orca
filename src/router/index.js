@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import { post, fetch, del, put } from '@/utils/http'
-import { delCookie, getCookie } from '@/utils/cookie'
+import { getCookie, delCookie } from "../utils/cookie";
 
 const Index = resolve => require(['/views/login'], resolve); // 登录
 const Home = resolve => require(['/views/home'], resolve); // 主页
@@ -24,7 +24,7 @@ const routes = [
     path: '/home',
     name: 'home',
     component: Home,
-    meta: { requireAuth: false },
+    meta: { requireAuth: true },
     iconCls: '',
   },
   // {

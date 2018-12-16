@@ -38,40 +38,37 @@
       <view-box ref="viewBox">
         <x-header :left-options="{showBack: false}">
           <x-icon @click.native="drawerToggle" slot="overwrite-left" type="navicon" size="35" class="over"></x-icon>
+          <h3 @click.native="tou">aaa</h3>
         </x-header>
         <div class="view">
           <router-view :webUrl="webUrl"></router-view>
         </div>
         <tabbar icon-class="vux-center" slot="bottom"> <!-- v-show="" -->
-          <tabbar-item show-dot @on-item-click="cruiseShowToggle">
-            <cruise :cruiseShow="cruiseShow"></cruise>
+          <tabbar-item @click.native="cruiseShowToggle">
+            <!--<cruise :msgShow="cruiseshow"></cruise>-->
             <img slot="icon" src="./assets/logo.png" alt=""/>
             <span slot="label">自主巡航</span>
           </tabbar-item>
-          <tabbar-item @click.native="cleanShowToggle">
-            <clean :msgShow="cleanShow"></clean>
+          <tabbar-item @on-item-click="cleanShowToggle">
             <img slot="icon" src="./assets/logo.png" alt=""/>
             <span slot="label">智慧清洁</span>
           </tabbar-item>
-          <tabbar-item badge="2" @click.native="detectShowToggle">
-            <detect :msgShow="detectShow"></detect>
+          <tabbar-item @on-item-click="detectShowToggle">
+            <!--<detect :msgShow="detectShow"></detect>-->
             <img slot="icon" src="./assets/logo.png" alt=""/>
             <span slot="label">水质监测</span>
           </tabbar-item>
         </tabbar>
       </view-box>
     </drawer>
-    <cruise></cruise>
+    <!--<cruise></cruise>-->
   </div>
 </template>
 
 <script>
   import { ViewBox, XHeader, Tabbar, TabbarItem, Group, Cell } from 'vux'
   import Drawer from '@/components/drawer.vue'
-  import { getCookie } from '@/utils/cookie'
-  import cruise from './common/cruise'
-  import clean from './common/clean'
-  import detect from './common/detect'
+  import { getCookie } from './utils/cookie'
   // import Bus from '@/assets/js/bus.js'
 
   export default {
@@ -84,9 +81,6 @@
       TabbarItem,
       Group,
       Cell,
-      cruise,
-      clean,
-      detect,
     },
     data() {
       return {
@@ -97,26 +91,29 @@
         path: '',
         items: [],
         paths: [],
-        cruiseShow: false,
-        cleanShow: false,
-        detectShow: false,
       }
     },
     mounted() {
       this.created();
     },
     methods: {
+      tou() {
+        console.log('tou');
+      },
       drawerToggle() {
         this.drawerShow = !this.drawerShow
       },
       cruiseShowToggle() {
-        this.$store.dispatch('changeShow').then();
+        // console.log('111');
+        this.$store.dispatch('cruiseShow').then();
       },
       cleanShowToggle() {
-        this.cleanShow = !this.cleanShow
+        // console.log('111');
+        this.$store.dispatch('cleanShow').then();
       },
       detectShowToggle() {
-        this.detectShow = !this.detectShow
+        // console.log('111');
+        this.$store.dispatch('detectShow').then();
       },
       onHide() {
         console.log('hide');
@@ -144,12 +141,10 @@
         this.path = to.path;
         if (this.path === '/' && getCookie("AppCookieToken")) {
           this.$router.push({
-            path: '/cruise',
+            path: '/home',
             query: { redirect: to.fullPath },
           });
         }
-
-        console.log(from);
         this.drawerShow = false; // 路由跳转、关闭侧边栏
       }
     },

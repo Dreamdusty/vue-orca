@@ -7,22 +7,30 @@ import 'mint-ui/lib/style.css'
 import App from './App'
 import router from './router/index'
 import { ToastPlugin } from 'vux'
-import toastMessages from './utils/toast'
-import store from './utils/store'
+import toastMessages from './utils/global/toast'
+import store from './store'
+import variable from './utils/global/variable'
+// import lngLat from './utils/global/lngLat'
+// import VueSocketio from 'vue-socket.io'
 
 Vue.use(VueAMap);
 Vue.use(MintUI);
 Vue.use(ToastPlugin);
 Vue.use(toastMessages);
+// Vue.use(lngLat);
 
 VueAMap.initAMapApiLoader({
   key: '87f1af7c4b4d86a7bd13155c3bc4ac31',
-  plugin: ['AMap.ToolBar'],
+  plugin: ['AMap.ToolBar', 'AMap.Autocomplete', 'AMap.PlaceSearch', 'AMap.ElasticMarker'],
   // 默认高德 sdk 版本为 1.4.4
   v: '1.4.11',
   // 高德 UI 组件库版本号
   uiVersion: '1.0.11'
 });
+
+Vue.prototype.$variable = variable;
+
+// Vue.use(VueSocketio, 'ws://vps.orca-tech.cn:9001');
 
 Vue.config.productionTip = false;
 

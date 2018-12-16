@@ -34,7 +34,8 @@
 
 <script>
   import { Group, XInput, XButton } from 'vux'
-  import { userLogin } from '/api/api'
+  import { userLogin } from "../api/api";
+  import { setCookie } from "../utils/cookie";
 
   export default {
     name: "login",
@@ -72,17 +73,19 @@
       keyPass () {
         this.disabled = !(this.$refs.refUser.valid === true && this.$refs.refPass.valid === true && this.account !== '' && this.password !== '');
       },
-      handleLogin() {
-        // userLogin({username: this.account, password: this.password}).then(res => {
-        //   if (res.data.code !== 200) {
-        //     // this.$vux.toast.show({
-        //     //   text: 'text',
-        //     // })
-        //     this.$toast(res.data.message);
-        //   } else {
+      handleLogin () {
+        userLogin({username: this.account, password: this.password}).then(res => {
+          if (res.data.code !== 200) {
+            // this.$vux.toast.show({
+            //   text: 'text',
+            // })
+            this.$toast(res.data.message);
+          } else {
             this.$router.push('/home');
-          // }
-        // });
+            setCookie('shipId', res.data.data.shipId);
+            setCookie('totalShip', res.data.data.totalShip);
+          }
+        });
       }
     },
     components: {
