@@ -16,29 +16,29 @@
               <div v-if="item === list[0]">
                 <div class="clean-top">
                   <tabbar-item @on-item-click="onTabbarIndex">
-                    <img slot="icon" src="../assets/logo.png" alt="">
+                    <img slot="icon" src="../../static/image/logo.png" alt="">
                     <span slot="label">标点</span>
                   </tabbar-item>
                   <tabbar-item @on-item-click="onTabbarIndex">
-                    <img slot="icon" src="../assets/logo.png" alt="">
+                    <img slot="icon" src="../../static/image/logo.png" alt="">
                     <span slot="label">撤销</span>
                   </tabbar-item>
                   <tabbar-item @on-item-click="onTabbarIndex">
-                    <img slot="icon" src="../assets/logo.png" alt="">
+                    <img slot="icon" src="../../static/image/logo.png" alt="">
                     <span slot="label">循环圈数</span>
                   </tabbar-item>
                 </div>
                 <div class="clean-bottom">
                   <tabbar-item @on-item-click="onTabbarIndex">
-                    <img slot="icon" src="../assets/logo.png" alt="">
+                    <img slot="icon" src="../../static/image/logo.png" alt="">
                     <span slot="label">清洁方式</span>
                   </tabbar-item>
                   <tabbar-item @on-item-click="onTabbarIndex">
-                    <img slot="icon" src="../assets/logo.png" alt="">
+                    <img slot="icon" src="../../static/image/logo.png" alt="">
                     <span slot="label">返航方式</span>
                   </tabbar-item>
                   <tabbar-item @on-item-click="onTabbarIndex">
-                    <img slot="icon" src="../assets/logo.png" alt="">
+                    <img slot="icon" src="../../static/image/logo.png" alt="">
                     <span slot="label">预约</span>
                   </tabbar-item>
                 </div>
@@ -50,25 +50,25 @@
               <div v-if="item === list[1]">
                 <div class="clean-top">
                   <tabbar-item @on-item-click="onTabbarIndex">
-                    <img slot="icon" src="../assets/logo.png" alt="">
+                    <img slot="icon" src="../../static/image/logo.png" alt="">
                     <span slot="label">标点</span>
                   </tabbar-item>
                   <tabbar-item @on-item-click="onTabbarIndex">
-                    <img slot="icon" src="../assets/logo.png" alt="">
+                    <img slot="icon" src="../../static/image/logo.png" alt="">
                     <span slot="label">撤销</span>
                   </tabbar-item>
                   <tabbar-item @on-item-click="onTabbarIndex">
-                    <img slot="icon" src="../assets/logo.png" alt="">
+                    <img slot="icon" src="../../static/image/logo.png" alt="">
                     <span slot="label">循环次数</span>
                   </tabbar-item>
                 </div>
                 <div class="clean-bottom-two">
                   <tabbar-item @on-item-click="onTabbarIndex">
-                    <img slot="icon" src="../assets/logo.png" alt="">
+                    <img slot="icon" src="../../static/image/logo.png" alt="">
                     <span slot="label">返航方式</span>
                   </tabbar-item>
                   <tabbar-item @on-item-click="onTabbarIndex">
-                    <img slot="icon" src="../assets/logo.png" alt="">
+                    <img slot="icon" src="../../static/image/logo.png" alt="">
                     <span slot="label">预约</span>
                   </tabbar-item>
                 </div>
@@ -117,11 +117,10 @@
         },
         set(value) {
           if (this.$store.getters.cruiseShow || this.$store.getters.detectShow) {
-            this.$store.commit('cruiseShow', false);
-            this.$store.commit('detectShow', false);
-          }
-          if (value) {
-            this.$store.commit('cleanShow', value)
+            if (value) {
+              this.$store.commit('cruiseShow', false);
+              this.$store.commit('detectShow', false);
+            }
           }
         },
       }

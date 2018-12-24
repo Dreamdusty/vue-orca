@@ -1,5 +1,5 @@
 // 获取cookie、
-export function getCookie(name) {
+export function getCookie (name) {
   let arr, reg = new RegExp("(^| )" + name + "=([^;]*)(;|$)");
   if (arr = document.cookie.match(reg))
     return (arr[2]);

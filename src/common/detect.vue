@@ -9,25 +9,25 @@
       <div class="detect-show">
         <div class="detect-top">
           <tabbar-item @on-item-click="onTabbarIndex">
-            <img slot="icon" src="../assets/logo.png" alt="">
+            <img slot="icon" src="../../static/image/logo.png" alt="">
             <span slot="label">标点</span>
           </tabbar-item>
           <tabbar-item @on-item-click="onTabbarIndex">
-            <img slot="icon" src="../assets/logo.png" alt="">
+            <img slot="icon" src="../../static/image/logo.png" alt="">
             <span slot="label">撤销</span>
           </tabbar-item>
           <tabbar-item @on-item-click="onTabbarIndex">
-            <img slot="icon" src="../assets/logo.png" alt="">
+            <img slot="icon" src="../../static/image/logo.png" alt="">
             <span slot="label">采样容量</span>
           </tabbar-item>
         </div>
         <div class="detect-bottom">
           <tabbar-item @on-item-click="onTabbarIndex">
-            <img slot="icon" src="../assets/logo.png" alt="">
+            <img slot="icon" src="../../static/image/logo.png" alt="">
             <span slot="label">检测时间</span>
           </tabbar-item>
           <tabbar-item @on-item-click="onTabbarIndex">
-            <img slot="icon" src="../assets/logo.png" alt="">
+            <img slot="icon" src="../../static/image/logo.png" alt="">
             <span slot="label">返航方式</span>
           </tabbar-item>
         </div>
@@ -61,18 +61,18 @@
         },
         set(value) {
           if (this.$store.getters.cruiseShow || this.$store.getters.cleanShow) {
-            this.$store.commit('cruiseShow', false);
-            this.$store.commit('cleanShow', false);
-          }
-          if (value) {
-            this.$store.commit('detectShow', value)
+            if (value) {
+              this.$store.commit('cruiseShow', false);
+              this.$store.commit('cleanShow', false);
+            }
           }
         },
       }
     },
     data () {
       return {
-      }
+
+      };
     },
   }
 </script>

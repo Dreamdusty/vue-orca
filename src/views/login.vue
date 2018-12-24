@@ -42,7 +42,7 @@
     data() {
       return {
         images: {
-          backgroundImage: "url(" + require("../../static/img/img1.jpg") + ") ",
+          backgroundImage: "url(" + require("../../static/image/login.jpg") + ") ",
           backgroundRepeat: "no-repeat",
           backgroundSize: "100%",
           width: "100%",

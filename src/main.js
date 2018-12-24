@@ -10,8 +10,8 @@ import { ToastPlugin } from 'vux'
 import toastMessages from './utils/global/toast'
 import store from './store'
 import variable from './utils/global/variable'
+import * as socketApi from './utils/socket'
 // import lngLat from './utils/global/lngLat'
-// import VueSocketio from 'vue-socket.io'
 
 Vue.use(VueAMap);
 Vue.use(MintUI);
@@ -29,8 +29,7 @@ VueAMap.initAMapApiLoader({
 });
 
 Vue.prototype.$variable = variable;
-
-// Vue.use(VueSocketio, 'ws://vps.orca-tech.cn:9001');
+Vue.prototype.$socketApi = socketApi;
 
 Vue.config.productionTip = false;
 

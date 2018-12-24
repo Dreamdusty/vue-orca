@@ -5,6 +5,7 @@ import { getCookie, delCookie } from "../utils/cookie";
 
 const Index = resolve => require(['/views/login'], resolve); // 登录
 const Home = resolve => require(['/views/home'], resolve); // 主页
+const Demo = resolve => require(['/views/demo'], resolve);
 // const Cruise = resolve => require(['/views/cruise/cruise'], resolve); // 自主巡航
 // const Clean = resolve => require(['/views/clean/clean'], resolve); // 智慧清洁
 // const Detect = resolve => require(['/views/detect/detect'], resolve); // 水质监测
@@ -26,6 +27,17 @@ const routes = [
     component: Home,
     meta: { requireAuth: true },
     iconCls: '',
+    children: [
+      {
+        path: '/home/demo',
+        name: 'demo',
+        component: Demo,
+        components: {
+          demo: Demo,
+        },
+        meta: { requireAuth: true },
+      }
+    ]
   },
   // {
   //   path: '/cruise',

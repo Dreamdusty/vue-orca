@@ -71,7 +71,7 @@ exports.cssLoaders = function (options) {
         loader: 'sass-resources-loader',
         options: {
           // resources接受一个数组，可以添加多个scss文件
-          resources: [path.resolve(__dirname, '../src/assets/scss/index.scss')] // 这里按照文件路径填写
+          resources: [path.resolve(__dirname, '../s/assets/scss/index.scss')] // 这里按照文件路径填写
         }
       }
     ),

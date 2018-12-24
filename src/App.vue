@@ -14,7 +14,7 @@
         <div class="head">
           <!-- 头像 -->
           <div class="avatar">
-            <img class="img" src="./assets/-1719275449.jpg" alt="">
+            <img class="img" src="../static/image/avatar.jpg" alt="">
           </div>
           <div class="login">
             <p class="log1">欧卡小蓝船</p>
@@ -26,7 +26,7 @@
           </cell>
           <cell title="设置边界及避障" link="/">
           </cell>
-          <cell title="任务" link="/">
+          <cell title="任务" link="../views/demo">
           </cell>
           <cell title="数据" link="/">
           </cell>
@@ -38,7 +38,12 @@
       <view-box ref="viewBox">
         <x-header :left-options="{showBack: false}">
           <x-icon @click.native="drawerToggle" slot="overwrite-left" type="navicon" size="35" class="over"></x-icon>
-          <h3 @click.native="tou">aaa</h3>
+          <!--<button-tab @click.native="tou">-->
+            <!--<button-tab-item>请选择船只</button-tab-item>-->
+          <!--</button-tab>-->
+          <div class="tou">
+            <cell @click.native="tou">请选择船只</cell>
+          </div>
         </x-header>
         <div class="view">
           <router-view :webUrl="webUrl"></router-view>
@@ -46,27 +51,28 @@
         <tabbar icon-class="vux-center" slot="bottom"> <!-- v-show="" -->
           <tabbar-item @click.native="cruiseShowToggle">
             <!--<cruise :msgShow="cruiseshow"></cruise>-->
-            <img slot="icon" src="./assets/logo.png" alt=""/>
+            <img slot="icon" src="../static/image/logo.png" alt=""/>
             <span slot="label">自主巡航</span>
           </tabbar-item>
           <tabbar-item @on-item-click="cleanShowToggle">
-            <img slot="icon" src="./assets/logo.png" alt=""/>
+            <img slot="icon" src="../static/image/logo.png" alt=""/>
             <span slot="label">智慧清洁</span>
           </tabbar-item>
           <tabbar-item @on-item-click="detectShowToggle">
             <!--<detect :msgShow="detectShow"></detect>-->
-            <img slot="icon" src="./assets/logo.png" alt=""/>
+            <img slot="icon" src="../static/image/logo.png" alt=""/>
             <span slot="label">水质监测</span>
           </tabbar-item>
         </tabbar>
       </view-box>
     </drawer>
     <!--<cruise></cruise>-->
+    <!--<vessel></vessel>-->
   </div>
 </template>
 
 <script>
-  import { ViewBox, XHeader, Tabbar, TabbarItem, Group, Cell } from 'vux'
+  import { ViewBox, XHeader, Tabbar, TabbarItem, Group, Cell, ButtonTab, ButtonTabItem } from 'vux'
   import Drawer from '@/components/drawer.vue'
   import { getCookie } from './utils/cookie'
   // import Bus from '@/assets/js/bus.js'
@@ -81,6 +87,8 @@
       TabbarItem,
       Group,
       Cell,
+      ButtonTab,
+      ButtonTabItem,
     },
     data() {
       return {
@@ -127,6 +135,7 @@
       },
       created() {
         this.$router.options.routes.forEach(route => {
+          console.log(route.path);
           this.items.push({
             name: route.name,
             path: route.path,
@@ -196,7 +205,7 @@
     }
   }
   .head {
-    background: url("./assets/background.png") !important;
+    background: url("../static/image/background.png") !important;
     height: 2.2rem !important; /* 260/75 */
     width: 250px !important;
     max-width: 250px !important;

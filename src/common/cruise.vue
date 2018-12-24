@@ -9,19 +9,19 @@
       <div class="cruise-show">
         <div class="cruise-top">
           <tabbar-item @on-item-click="onTabbarIndex">
-            <img slot="icon" src="../assets/logo.png" alt="">
+            <img slot="icon" src="../../static/image/logo.png" alt="">
             <span slot="label">标点</span>
           </tabbar-item>
           <tabbar-item @on-item-click="onTabbarIndex">
-            <img slot="icon" src="../assets/logo.png" alt="">
+            <img slot="icon" src="../../static/image/logo.png" alt="">
             <span slot="label">撤销</span>
           </tabbar-item>
           <tabbar-item @on-item-click="onTabbarIndex">
-            <img slot="icon" src="../assets/logo.png" alt="">
+            <img slot="icon" src="../../static/image/logo.png" alt="">
             <span slot="label">循环圈数</span>
           </tabbar-item>
           <tabbar-item @on-item-click="onTabbarIndex">
-            <img slot="icon" src="../assets/logo.png" alt="">
+            <img slot="icon" src="../../static/image/logo.png" alt="">
             <span slot="label">全部删除</span>
           </tabbar-item>
         </div>
@@ -55,18 +55,18 @@
         },
         set(value) {
           if (this.$store.getters.cleanShow || this.$store.getters.detectShow) {
-            this.$store.commit('cleanShow', false);
-            this.$store.commit('detectShow', false);
-          }
-          if (value) {
-            this.$store.commit('cruiseShow', value)
+            if (value) {
+              this.$store.commit('cleanShow', false);
+              this.$store.commit('detectShow', false);
+            }
           }
         },
       }
     },
     data () {
       return {
-      }
+
+      };
     },
   }
 </script>
