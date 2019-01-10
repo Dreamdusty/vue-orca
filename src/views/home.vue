@@ -20,6 +20,7 @@
 //fzp123  123456
   let map;
   let marker;
+  let amap;
   export default {
     name: "home",
     data () {

@@ -2,8 +2,6 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import VueAMap from 'vue-amap'
-import MintUI from 'mint-ui'
-import 'mint-ui/lib/style.css'
 import App from './App'
 import router from './router/index'
 import { ToastPlugin } from 'vux'
@@ -14,7 +12,6 @@ import * as socketApi from './utils/socket'
 // import lngLat from './utils/global/lngLat'
 
 Vue.use(VueAMap);
-Vue.use(MintUI);
 Vue.use(ToastPlugin);
 Vue.use(toastMessages);
 // Vue.use(lngLat);

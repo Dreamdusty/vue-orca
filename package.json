@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
-    "mint-ui": "^2.2.13",
     "mockjs": "^1.0.1-beta3",
     "node-sass": "^4.10.0",
     "qs": "^6.6.0",
@@ -20,7 +19,6 @@
     "vue-cookie": "^1.1.4",
     "vue-infinite-scroll": "^2.0.2",
     "vue-router": "^3.0.1",
-    "vue-socket.io": "^3.0.4",
     "vuex": "^3.0.1",
     "vux": "^2.9.2",
     "vux-loader": "^1.2.9"

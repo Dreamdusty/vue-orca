@@ -15,37 +15,38 @@
             <swiper-item v-for="(item, index) in list" :key="index">
               <div v-if="item === list[0]">
                 <div class="clean-top">
-                  <tabbar-item @on-item-click="onTabbarIndex">
-                    <img slot="icon" src="../../static/image/logo.png" alt="">
-                    <span slot="label">标点</span>
-                  </tabbar-item>
-                  <tabbar-item @on-item-click="onTabbarIndex">
-                    <img slot="icon" src="../../static/image/logo.png" alt="">
-                    <span slot="label">撤销</span>
-                  </tabbar-item>
-                  <tabbar-item @on-item-click="onTabbarIndex">
-                    <img slot="icon" src="../../static/image/logo.png" alt="">
-                    <span slot="label">循环圈数</span>
-                  </tabbar-item>
+                  <icon v-bind:status="status" v-bind:type="'3'"></icon>
+                  <!--<tabbar-item @on-item-click="onTabbarIndex">-->
+                    <!--<img slot="icon" src="../../static/image/logo.png" alt="">-->
+                    <!--<span slot="label">标点</span>-->
+                  <!--</tabbar-item>-->
+                  <!--<tabbar-item @on-item-click="onTabbarIndex">-->
+                    <!--<img slot="icon" src="../../static/image/logo.png" alt="">-->
+                    <!--<span slot="label">撤销</span>-->
+                  <!--</tabbar-item>-->
+                  <!--<tabbar-item @on-item-click="onTabbarIndex">-->
+                    <!--<img slot="icon" src="../../static/image/logo.png" alt="">-->
+                    <!--<span slot="label">循环圈数</span>-->
+                  <!--</tabbar-item>-->
                 </div>
-                <div class="clean-bottom">
-                  <tabbar-item @on-item-click="onTabbarIndex">
-                    <img slot="icon" src="../../static/image/logo.png" alt="">
-                    <span slot="label">清洁方式</span>
-                  </tabbar-item>
-                  <tabbar-item @on-item-click="onTabbarIndex">
-                    <img slot="icon" src="../../static/image/logo.png" alt="">
-                    <span slot="label">返航方式</span>
-                  </tabbar-item>
-                  <tabbar-item @on-item-click="onTabbarIndex">
-                    <img slot="icon" src="../../static/image/logo.png" alt="">
-                    <span slot="label">预约</span>
-                  </tabbar-item>
-                </div>
-                <div class="clean-button">
-                  <x-button mini>开始任务</x-button>
-                  <x-button mini type="primary">保存任务</x-button>
-                </div>
+                <!--<div class="clean-bottom">-->
+                  <!--<tabbar-item @on-item-click="onTabbarIndex">-->
+                    <!--<img slot="icon" src="../../static/image/logo.png" alt="">-->
+                    <!--<span slot="label">清洁方式</span>-->
+                  <!--</tabbar-item>-->
+                  <!--<tabbar-item @on-item-click="onTabbarIndex">-->
+                    <!--<img slot="icon" src="../../static/image/logo.png" alt="">-->
+                    <!--<span slot="label">返航方式</span>-->
+                  <!--</tabbar-item>-->
+                  <!--<tabbar-item @on-item-click="onTabbarIndex">-->
+                    <!--<img slot="icon" src="../../static/image/logo.png" alt="">-->
+                    <!--<span slot="label">预约</span>-->
+                  <!--</tabbar-item>-->
+                <!--</div>-->
+                <!--<div class="clean-button">-->
+                  <!--<x-button mini>开始任务</x-button>-->
+                  <!--<x-button mini type="primary">保存任务</x-button>-->
+                <!--</div>-->
               </div>
               <div v-if="item === list[1]">
                 <div class="clean-top">
@@ -87,6 +88,7 @@
 
 <script>
   import { Popup, Tab, TabItem, TabbarItem, Swiper, SwiperItem, XButton } from 'vux'
+  import Icon from '../components/icon.vue'
   export default {
     name: "clean",
     components: {
@@ -97,6 +99,7 @@
       Swiper,
       SwiperItem,
       XButton,
+      Icon
     },
     methods: {
       onClickClean(item) {
@@ -111,6 +114,9 @@
       },
     },
     computed: {
+      status(){
+        return "0";
+      },
       showPopup: {
         get() {
           return this.$store.getters.cleanShow

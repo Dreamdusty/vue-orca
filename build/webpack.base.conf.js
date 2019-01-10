@@ -19,7 +19,8 @@ const webpackConfig  = {
     filename: '[name].js',
     publicPath: process.env.NODE_ENV === 'production'
       ? config.build.assetsPublicPath
-      : config.dev.assetsPublicPath
+      : config.dev.assetsPublicPath,
+    libraryTarget: "var"
   },
   resolve: {
     extensions: ['.js', '.vue', '.json', 'less'],
@@ -33,6 +34,7 @@ const webpackConfig  = {
       '/components': resolve('src/components'),
       '/views': resolve('src/views'),
       '/utils': resolve('src/utils'),
+
     }
   },
   module: {

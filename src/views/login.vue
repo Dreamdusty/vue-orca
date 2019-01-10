@@ -27,6 +27,7 @@
         class="login"
         @click.native="handleLogin"
         :disabled="disabled"
+        v-model="data"
       >登录</XButton>
     </div>
   </div>
@@ -41,6 +42,7 @@
     name: "login",
     data() {
       return {
+        data: '',
         images: {
           backgroundImage: "url(" + require("../../static/image/login.jpg") + ") ",
           backgroundRepeat: "no-repeat",
@@ -75,16 +77,17 @@
       },
       handleLogin () {
         userLogin({username: this.account, password: this.password}).then(res => {
-          if (res.data.code !== 200) {
-            // this.$vux.toast.show({
-            //   text: 'text',
-            // })
-            this.$toast(res.data.message);
-          } else {
-            this.$router.push('/home');
-            setCookie('shipId', res.data.data.shipId);
-            setCookie('totalShip', res.data.data.totalShip);
-          }
+          // if (res.data.code !== 200) {
+          //   // this.$vux.toast.show({
+          //   //   text: 'text',
+          //   // })
+          //   this.$toast();
+          //   this.$toast(res.data.message);
+          // } else {
+          //   this.$router.push('/home');
+          //   setCookie('shipId', res.data.data.shipId);
+          //   setCookie('totalShip', res.data.data.totalShip);
+          // }
         });
       }
     },

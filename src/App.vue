@@ -145,17 +145,17 @@
       },
     },
     watch: {
-      '$route' (to, from) {
-        console.log(...this.paths);
-        this.path = to.path;
-        if (this.path === '/' && getCookie("AppCookieToken")) {
-          this.$router.push({
-            path: '/home',
-            query: { redirect: to.fullPath },
-          });
-        }
-        this.drawerShow = false; // 路由跳转、关闭侧边栏
-      }
+      // '$route' (to, from) {
+      //   console.log(...this.paths);
+      //   this.path = to.path;
+      //   if (this.path === '/' && getCookie("AppCookieToken")) {
+      //     this.$router.push({
+      //       path: '/home',
+      //       query: { redirect: to.fullPath },
+      //     });
+      //   }
+      //   this.drawerShow = false; // 路由跳转、关闭侧边栏
+      // }
     },
   }
 </script>
