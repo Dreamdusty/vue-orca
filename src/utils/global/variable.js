@@ -13,6 +13,11 @@ export default {
   allRouteMarkerBarrierPosition: [],
   allRouteMarkerLngLat: [],
 
+  canSign:0,
+  signMethod:0,
+  //有问题，是因为这个数据是每一个都要变化，切回去的时候我的变量应该如何变化。
+  //如何将数据传进去//如何将数据传进去？？？？
+
 //   var $j = jQuery.noConflict();
 // var pointLabelType = "";
 // var ec = "";
@@ -85,4 +90,13 @@ export default {
   setAllRouteMarkerPosition (id, lngLat) {
     this.allRouteMarkerPosition[id].push(lngLat);
   },
+  setCanSign(sign){
+    console.log("改变全局变量");
+    this.canSign = sign;
+  },
+  setSignMethod(signMethod){
+    console.log("改变全局变量");
+    this.signMethod = signMethod;
+  }
+
 }

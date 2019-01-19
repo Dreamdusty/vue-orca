@@ -7,41 +7,23 @@
       :hide-on-blur="false"
       :show-mask="false">
       <div class="cruise-show">
-        <div class="cruise-top">
-          <tabbar-item @on-item-click="onTabbarIndex">
-            <img slot="icon" src="../../static/image/logo.png" alt="">
-            <span slot="label">标点</span>
-          </tabbar-item>
-          <tabbar-item @on-item-click="onTabbarIndex">
-            <img slot="icon" src="../../static/image/logo.png" alt="">
-            <span slot="label">撤销</span>
-          </tabbar-item>
-          <tabbar-item @on-item-click="onTabbarIndex">
-            <img slot="icon" src="../../static/image/logo.png" alt="">
-            <span slot="label">循环圈数</span>
-          </tabbar-item>
-          <tabbar-item @on-item-click="onTabbarIndex">
-            <img slot="icon" src="../../static/image/logo.png" alt="">
-            <span slot="label">全部删除</span>
-          </tabbar-item>
-        </div>
-        <div class="cruise-button">
-          <x-button mini>开始任务</x-button>
-          <x-button mini type="primary">保存任务</x-button>
-        </div>
+        <icon v-bind:status="status" v-bind:type="'1'"></icon>
       </div>
     </popup>
   </div>
 </template>
 
 <script>
-  import { Popup, TabbarItem, XButton } from 'vux'
+  import { Popup, XButton, Grid, GridItem } from 'vux'
+  import Icon from '../components/icon.vue'
   export default {
-    name: "cruise",
+    name: "detect",
     components: {
       Popup,
-      TabbarItem,
       XButton,
+      Grid,
+      GridItem,
+      Icon,
     },
     methods: {
       onTabbarIndex() {
@@ -49,15 +31,18 @@
       },
     },
     computed: {
+      status(){
+        return "0";
+      },
       showPopup: {
         get() {
           return this.$store.getters.cruiseShow
         },
         set(value) {
-          if (this.$store.getters.cleanShow || this.$store.getters.detectShow) {
+          if (this.$store.getters.detectShow || this.$store.getters.cleanShow) {
             if (value) {
-              this.$store.commit('cleanShow', false);
               this.$store.commit('detectShow', false);
+              this.$store.commit('cleanShow', false);
             }
           }
         },
@@ -71,7 +56,11 @@
   }
 </script>
 
+
+
 <style lang="less">
+  @import '~vux/src/styles/reset.less';
+
   .cruise-popup {
     position: fixed;
   }
@@ -97,5 +86,9 @@
   }
   .cruise-button .weui-btn_mini {
     padding: 0 13%;
+  }
+
+  .cruise-top .weui-grid {
+    padding: 13px 10px;
   }
 </style>

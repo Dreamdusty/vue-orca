@@ -6,7 +6,7 @@ let global_callback = null;
 // 初始化socket
 function initWebSocket() {
   webSocket = new WebSocket('ws://vps.orca-tech.cn:9001');
-  webSocket.onmessage = function (e) {
+  webSocket.onmessage = function (e) {//接收消息
     socketMessage(e);
   };
   webSocket.onclose = function () {
@@ -33,7 +33,7 @@ function sendSocket(agentData, callback) {
     }, 1000);
   } else {
     // 若未开启，则等待1s后重新调用
-    setTimeout(function () {
+      setTimeout(function () {
       sendSocket(agentData, callback);
     }, 1000);
   }
@@ -51,14 +51,19 @@ function socketSend(e) {
 
 // 关闭
 function socketClose() {
-  this.$toast('请检查网络，与服务器的连接已断开！');
+  // this.$toast('请检查网络，与服务器的连接已断开！');
 }
 
 // 打开
-function socketOpen() {
+function socketOpen() {//就是说当前用户的信息是保存在cookie里面的
   socketSend('&ship_id;' + getCookie('shipId') + '#');
   socketSend('&total_ship;' + getCookie('totalShip') + '#');
 }
+
+
+
+//在这里面写发送的请求：
+//直接发命令就行了，但还得写到数据库里面
 
 initWebSocket();
 

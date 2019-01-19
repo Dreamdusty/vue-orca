@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <router-view name="index"></router-view>
+    <router-view name="index" v-if="false"></router-view>
     <drawer
       :show="drawerShow"
       :pos="pos"
@@ -8,8 +8,9 @@
       @change-show="changeDrawerShow"
       @on-hide="onHide"
       @on-show="onShow"
-      v-if="path !== '/'">
-      <!-- drawer content -->
+      v-if="true">
+      <!-- v-if="path !== '/'" -->
+      <!-- 菜单内容 -->
       <div slot="drawer" class="drawer">
         <div class="head">
           <!-- 头像 -->
@@ -34,13 +35,10 @@
           </cell>
         </group>
       </div>
-      <!-- main content -->
+      <!-- 主页内容 -->
       <view-box ref="viewBox">
         <x-header :left-options="{showBack: false}">
           <x-icon @click.native="drawerToggle" slot="overwrite-left" type="navicon" size="35" class="over"></x-icon>
-          <!--<button-tab @click.native="tou">-->
-            <!--<button-tab-item>请选择船只</button-tab-item>-->
-          <!--</button-tab>-->
           <div class="tou">
             <cell @click.native="tou">请选择船只</cell>
           </div>
@@ -50,7 +48,6 @@
         </div>
         <tabbar icon-class="vux-center" slot="bottom"> <!-- v-show="" -->
           <tabbar-item @click.native="cruiseShowToggle">
-            <!--<cruise :msgShow="cruiseshow"></cruise>-->
             <img slot="icon" src="../static/image/logo.png" alt=""/>
             <span slot="label">自主巡航</span>
           </tabbar-item>
@@ -59,15 +56,12 @@
             <span slot="label">智慧清洁</span>
           </tabbar-item>
           <tabbar-item @on-item-click="detectShowToggle">
-            <!--<detect :msgShow="detectShow"></detect>-->
             <img slot="icon" src="../static/image/logo.png" alt=""/>
             <span slot="label">水质监测</span>
           </tabbar-item>
         </tabbar>
       </view-box>
     </drawer>
-    <!--<cruise></cruise>-->
-    <!--<vessel></vessel>-->
   </div>
 </template>
 
@@ -75,7 +69,6 @@
   import { ViewBox, XHeader, Tabbar, TabbarItem, Group, Cell, ButtonTab, ButtonTabItem } from 'vux'
   import Drawer from '@/components/drawer.vue'
   import { getCookie } from './utils/cookie'
-  // import Bus from '@/assets/js/bus.js'
 
   export default {
     name: 'App',
@@ -99,6 +92,7 @@
         path: '',
         items: [],
         paths: [],
+        cookie: false,
       }
     },
     mounted() {
@@ -145,22 +139,31 @@
       },
     },
     watch: {
-      // '$route' (to, from) {
-      //   console.log(...this.paths);
-      //   this.path = to.path;
-      //   if (this.path === '/' && getCookie("AppCookieToken")) {
-      //     this.$router.push({
-      //       path: '/home',
-      //       query: { redirect: to.fullPath },
-      //     });
-      //   }
-      //   this.drawerShow = false; // 路由跳转、关闭侧边栏
-      // }
+      '$route' (to, from) {
+        console.log(...this.paths);
+        this.path = to.path;
+        // if (this.path === '/' && getCookie("AppCookieToken")) {
+        //   this.$router.push({
+        //     path: '/home',
+        //     query: { redirect: to.fullPath },
+        //   });
+        // }
+        // this.drawerShow = false; // 路由跳转、关闭侧边栏
+
+        if (getCookie("AppCookieToken")) {
+          this.cookie = true;
+        }
+        this.drawerShow = false; // 路由跳转、关闭侧边栏
+      }
     },
   }
 </script>
 
 <style scoped lang="less">
+  @import '~vux/src/styles/reset.less';
+  @import '~vux/src/styles/1px.less';
+  @import '~vux/src/styles/tap.less';
+
   html {
     height: 100% !important;
   }

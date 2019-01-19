@@ -34,7 +34,6 @@ const webpackConfig  = {
       '/components': resolve('src/components'),
       '/views': resolve('src/views'),
       '/utils': resolve('src/utils'),
-
     }
   },
   module: {

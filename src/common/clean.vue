@@ -2,116 +2,36 @@
   <div class="clean-popup">
     <popup
       v-model="showPopup"
-      height="323px"
+      height="217px"
       :is-transparent="true"
       :hide-on-blur="false"
       :show-mask="false">
       <div class="clean-show">
-        <tab :line-width=1 active-color='#1e445c' v-model="index">
-          <tab-item @on-item-click="onClickClean(item)" class="vux-center" :selected="clean === item" v-for="(item, index) in list" @click="clean = item" :key="index">{{item}}</tab-item>
-        </tab>
-        <div class="clean-tab">
-          <swiper v-model="index" height="100px" :show-dots="false">
-            <swiper-item v-for="(item, index) in list" :key="index">
-              <div v-if="item === list[0]">
-                <div class="clean-top">
-                  <icon v-bind:status="status" v-bind:type="'3'"></icon>
-                  <!--<tabbar-item @on-item-click="onTabbarIndex">-->
-                    <!--<img slot="icon" src="../../static/image/logo.png" alt="">-->
-                    <!--<span slot="label">标点</span>-->
-                  <!--</tabbar-item>-->
-                  <!--<tabbar-item @on-item-click="onTabbarIndex">-->
-                    <!--<img slot="icon" src="../../static/image/logo.png" alt="">-->
-                    <!--<span slot="label">撤销</span>-->
-                  <!--</tabbar-item>-->
-                  <!--<tabbar-item @on-item-click="onTabbarIndex">-->
-                    <!--<img slot="icon" src="../../static/image/logo.png" alt="">-->
-                    <!--<span slot="label">循环圈数</span>-->
-                  <!--</tabbar-item>-->
-                </div>
-                <!--<div class="clean-bottom">-->
-                  <!--<tabbar-item @on-item-click="onTabbarIndex">-->
-                    <!--<img slot="icon" src="../../static/image/logo.png" alt="">-->
-                    <!--<span slot="label">清洁方式</span>-->
-                  <!--</tabbar-item>-->
-                  <!--<tabbar-item @on-item-click="onTabbarIndex">-->
-                    <!--<img slot="icon" src="../../static/image/logo.png" alt="">-->
-                    <!--<span slot="label">返航方式</span>-->
-                  <!--</tabbar-item>-->
-                  <!--<tabbar-item @on-item-click="onTabbarIndex">-->
-                    <!--<img slot="icon" src="../../static/image/logo.png" alt="">-->
-                    <!--<span slot="label">预约</span>-->
-                  <!--</tabbar-item>-->
-                <!--</div>-->
-                <!--<div class="clean-button">-->
-                  <!--<x-button mini>开始任务</x-button>-->
-                  <!--<x-button mini type="primary">保存任务</x-button>-->
-                <!--</div>-->
-              </div>
-              <div v-if="item === list[1]">
-                <div class="clean-top">
-                  <tabbar-item @on-item-click="onTabbarIndex">
-                    <img slot="icon" src="../../static/image/logo.png" alt="">
-                    <span slot="label">标点</span>
-                  </tabbar-item>
-                  <tabbar-item @on-item-click="onTabbarIndex">
-                    <img slot="icon" src="../../static/image/logo.png" alt="">
-                    <span slot="label">撤销</span>
-                  </tabbar-item>
-                  <tabbar-item @on-item-click="onTabbarIndex">
-                    <img slot="icon" src="../../static/image/logo.png" alt="">
-                    <span slot="label">循环次数</span>
-                  </tabbar-item>
-                </div>
-                <div class="clean-bottom-two">
-                  <tabbar-item @on-item-click="onTabbarIndex">
-                    <img slot="icon" src="../../static/image/logo.png" alt="">
-                    <span slot="label">返航方式</span>
-                  </tabbar-item>
-                  <tabbar-item @on-item-click="onTabbarIndex">
-                    <img slot="icon" src="../../static/image/logo.png" alt="">
-                    <span slot="label">预约</span>
-                  </tabbar-item>
-                </div>
-                <div class="clean-button">
-                  <x-button mini>开始任务</x-button>
-                  <x-button mini type="primary">保存任务</x-button>
-                </div>
-              </div>
-            </swiper-item>
-          </swiper>
-        </div>
+        <icon v-bind:status="status" v-bind:type="'3'"></icon>
       </div>
     </popup>
   </div>
 </template>
 
 <script>
-  import { Popup, Tab, TabItem, TabbarItem, Swiper, SwiperItem, XButton } from 'vux'
+  import { Popup, XButton, Grid, GridItem } from 'vux'
   import Icon from '../components/icon.vue'
   export default {
-    name: "clean",
+    name: "detect",
     components: {
       Popup,
-      TabbarItem,
-      Tab,
-      TabItem,
-      Swiper,
-      SwiperItem,
       XButton,
-      Icon
+      Grid,
+      GridItem,
+      Icon,
     },
     methods: {
-      onClickClean(item) {
-        if (item === '区域清洁') {
-          console.log('区域清洁');
-        } else {
-          console.log('延边清洁');
-        }
-      },
       onTabbarIndex() {
         console.log('点击');
       },
+/*      sign(data){
+        this.$emit('sign',data);
+      }*/
     },
     computed: {
       status(){
@@ -133,15 +53,18 @@
     },
     data () {
       return {
-        list: ['区域清洁', '延边清洁'],
-        index: 0,
-        clean: '区域清洁',
-      }
+
+
+      };
     },
   }
 </script>
 
+
+
 <style lang="less">
+  @import '~vux/src/styles/reset.less';
+
   .clean-popup {
     position: fixed;
   }
@@ -174,5 +97,9 @@
   }
   .clean-button .weui-btn_mini {
     padding: 0 13%;
+  }
+
+  .weui-grid {
+    padding: 13px 10px;
   }
 </style>
