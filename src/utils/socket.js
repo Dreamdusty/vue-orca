@@ -4,7 +4,7 @@ let webSocket = null;
 let global_callback = null;
 let send = null;
 let receive = null;
-
+let data=[[1,2],[3,4],[5,6],[7,8],[9,0]];
 
 // 初始化socket
 function initWebSocket() {
@@ -48,17 +48,28 @@ function sendSocket(agentData, callback) {
 data 是一个对象数组
  */
 function sendAreaPoint(data){
+  change(data);
+  sendSocket(send);
 
 }
-/*//将相关形式
-function Change(data){
-  send ="$lnglat[";
+//将相关形式
+function change(data){
+  send ="&lnglat;[";
   //先实现二维数组扁平化
-  var data2 = data.reduce(function(function(previous)));
-  data.forEach(function(v,k){
-    send+=v.
+  let data2 = data.reduce(function(previous,current){
+      return previous.concat(current);
+  },[]);
+
+  data2.forEach(function(v,k){
+    if(k%2===0){
+      send+="["+v;
+    }else{
+      send+=","+v+"],"
+    }
   })
-}*/
+  send+="]#";
+  console.log(send);
+}
 
 // 数据接收
 function socketMessage(e) {
@@ -86,6 +97,7 @@ function socketOpen() {//就是说当前用户的信息是保存在cookie里面�
 //在这里面写发送的请求：
 //直接发命令就行了，但还得写到数据库里面
 
-initWebSocket();
+//initWebSocket();
+change(data);
 
 export { sendSocket }
