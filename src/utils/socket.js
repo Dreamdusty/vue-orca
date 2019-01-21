@@ -2,6 +2,9 @@ import { getCookie } from "./cookie";
 
 let webSocket = null;
 let global_callback = null;
+let send = null;
+let receive = null;
+
 
 // 初始化socket
 function initWebSocket() {
@@ -38,6 +41,24 @@ function sendSocket(agentData, callback) {
     }, 1000);
   }
 }
+
+
+/*
+发送区域点
+data 是一个对象数组
+ */
+function sendAreaPoint(data){
+
+}
+/*//将相关形式
+function Change(data){
+  send ="$lnglat[";
+  //先实现二维数组扁平化
+  var data2 = data.reduce(function(function(previous)));
+  data.forEach(function(v,k){
+    send+=v.
+  })
+}*/
 
 // 数据接收
 function socketMessage(e) {

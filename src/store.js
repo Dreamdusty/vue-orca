@@ -100,6 +100,5 @@ export default new Vuex.Store({
       commit('canDelete');
     }
 
-
   }
 });

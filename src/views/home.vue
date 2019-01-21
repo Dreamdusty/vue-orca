@@ -38,12 +38,17 @@
     },
     computed: {
       msg(){//船的数目
-
           return {
             id: this.present,
             pointType: this.$store.getters.signMethod,
             canSign: this.$store.getters.canSign,
             isdel:this.$store.getters.canDelete,
+            ship: [[108.89662,34.247559], [108.898846, 34.247005]],//所有船坐标
+            shipRoad: [],//所有船走的所有路径点
+            shipAngle: [90,30],//所有船角度
+            shipChooseId: 0,//当前选中船的ID
+            CurrentTaskId: -1,//当前所选船的任务id -1表示当没有任务 0巡航任务 1 水质任务 2区域任务
+            CurrentTaskPath:[],//当前任务路径点
           }
        },
       deletePoint(){

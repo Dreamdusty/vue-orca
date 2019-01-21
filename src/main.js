@@ -9,10 +9,14 @@ import toastMessages from './utils/global/toast'
 import store from './store'
 import variable from './utils/global/variable'
 import * as socketApi from './utils/socket'
+import ElementUI from 'element-ui';
+import 'element-ui/lib/theme-chalk/index.css'
 
 Vue.use(VueAMap);
 Vue.use(ToastPlugin);
 Vue.use(toastMessages);
+Vue.use(ElementUI);
+
 
 VueAMap.initAMapApiLoader({
   key: "e1dedc6bdd765d46693986ff7ff969f4",

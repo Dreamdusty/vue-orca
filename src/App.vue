@@ -39,8 +39,24 @@
       <view-box ref="viewBox">
         <x-header :left-options="{showBack: false}">
           <x-icon @click.native="drawerToggle" slot="overwrite-left" type="navicon" size="35" class="over"></x-icon>
-          <div class="tou">
-            <cell @click.native="tou">请选择船只</cell>
+          <div>
+            <popover placement="bottom" style="margin:0px;">
+              <div slot="content" class="popover-demo-content">
+                <div v-for="ship in shipList" >
+                  <x-button @click.native="confirmShow(ship.value)" style="padding:10px 20px 10px 20px; background-color:#35495e;border-style:hidden;color:white">{{ship.name}}</x-button>
+                  <hr>
+                </div>
+              </div>
+              <x-button class="btn btn-default" style="background-color:#35495e;font-size:20px;border-style:hidden;color:white">{{headerTop}}</x-button>
+
+            </popover>
+           <!-- <p>其实这是一个下拉框<p>-->
+            <popover placement="bottom" style="margin:0px;">
+              <div slot="content" class="popover-demo-content">
+                <p>这里用来输出船的相关信息</p>
+              </div>
+              <button  class="my-btn vux-header-right"><i style="color:white;font-size:20px " class="el-icon-view"></i></button>
+            </popover>
           </div>
         </x-header>
         <div class="view">
@@ -62,11 +78,24 @@
         </tabbar>
       </view-box>
     </drawer>
+
+    <div v-transfer-dom>
+      <confirm v-model="show"
+               :title="'确定换一艘船'"
+               @on-cancel="onCancel"
+               @on-confirm="onConfirm"
+               @on-show="onShow"
+               @on-hide="onHide">
+        <p style="text-align:center;">Are you sure?</p>
+      </confirm>
+    </div>
   </div>
+
+
 </template>
 
 <script>
-  import { ViewBox, XHeader, Tabbar, TabbarItem, Group, Cell, ButtonTab, ButtonTabItem } from 'vux'
+  import { ViewBox, XHeader, Confirm,Tabbar, TabbarItem, Group, Cell, ButtonTab, ButtonTabItem ,Popover,Checklist,TransferDom,XButton} from 'vux'
   import Drawer from '@/components/drawer.vue'
   import { getCookie } from './utils/cookie'
 
@@ -82,6 +111,10 @@
       Cell,
       ButtonTab,
       ButtonTabItem,
+      Popover,
+      Checklist,
+      Confirm,
+      XButton
     },
     data() {
       return {
@@ -93,15 +126,37 @@
         items: [],
         paths: [],
         cookie: false,
+        headerTop:'请选择船',
+        shipList:[{name:'浐灞121231231' ,value:0},{name:'兴庆3dsvsvwdvds',value:1}],
+        ship:['浐灞'],
+        show:false,
+        present:0,
+        temp:0,
+        
       }
     },
     mounted() {
       this.created();
     },
     methods: {
-      tou() {
-        console.log('tou');
+
+      onCancel () {
+        console.log('on cancel')
       },
+      onConfirm (msg) {
+        console.log('on confirm')
+        if (msg) {
+          alert(msg)
+        }
+        this.present = this.temp;  //把船换了
+       // 确定要切换船，就要切换
+
+      },
+      confirmShow(id){
+        this.show = true;
+        this.temp = id;
+      },
+
       drawerToggle() {
         this.drawerShow = !this.drawerShow
       },
@@ -155,6 +210,9 @@
         }
         this.drawerShow = false; // 路由跳转、关闭侧边栏
       }
+    },
+    directives: {
+      TransferDom
     },
   }
 </script>
@@ -227,5 +285,18 @@
       font-size: 0.23rem !important;
       margin-left: 0.15rem !important;
     }
+    .view-ship {
+      margin:5px 30px 5px 30px !important;
+    }
   }
+  .my-btn{
+    width:32px;
+    height:32px;
+    border-radius: 15px;
+    background-color:#35495e;
+    border: hidden;
+    margin-right: 5px;
+
+  }
+
 </style>

@@ -409,7 +409,7 @@
       setSignMethod(){
         this.signMethodSelect=false;
         if(this.signMethod[0]==="路径点"){
-          this.signMethodToFather=0;
+          this.signMethodToFather=3;
         }else if(this.signMethod[0]==="区域点"){
           this.signMethodToFather=2;
         }
