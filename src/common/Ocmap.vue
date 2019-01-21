@@ -1,0 +1,774 @@
+<template>
+  <div class="amap">
+    <div id="amap-main">
+    </div>
+    <!--<button @click="delMarker">删除</button>-->
+    <p>{{ msg }}</p>
+  </div>
+</template>
+<style>
+  #amap-main {
+    width: 375px;
+    height: 667px;
+  }
+
+  /* 覆盖高德logo样式 */
+  .amap .amap-logo {
+    right: -10000px !important;
+    left: auto !important;
+    display: none;
+  }
+
+  .amap .amap-copyright {
+    bottom: -10000px;
+    display: none;
+  }
+</style>
+
+<script>
+  import {lazyAMapApiLoaderInstance} from 'vue-amap';
+  import roadIcon from '../../static/image/1.png';
+  import waterIcon from '../../static/image/2.png';
+  import shipIcon from '../../static/image/Ship.png';
+  import areaIcon from '../../static/image/3.png';
+  import areaRoadIcon from '../../static/image/4.png'
+
+  let map;//地图实例
+  let polyline;//路径折线
+  let arealine;//区域未闭合前的直线
+  let cleanline;//清洁路线实例
+  let polygon;//区域
+  let boundary = []; //边界区域实例集合
+  let obstacle = []; //障碍区域物实例集合s
+  let that = this;
+  var path = [];//路径点
+  var waterPath = [];//水质点
+  var areaPath = [];//区域点
+  var arealinePath = [];//区域未闭合时的点
+  var cleanPath = [];//情节路线
+  var copy = [];//临时保存数据的数组
+  var copy2 = [];
+
+  export default {
+    props: ['msg'],
+    data() {
+      return {
+        bounds: [
+          // [[108.8996, 34.247643], [108.899923, 34.24716], [108.899983, 34.247876]],
+          [[108.896177, 34.248721], [108.896091, 34.247133], [108.89916, 34.246229], [108.899578, 34.248118]]
+        ],
+        obstacles: [
+          [[108.897353, 34.247879], [108.897351, 34.247825], [108.89729, 34.247817], [108.897289, 34.247886]],
+          [[108.898532, 34.248046], [108.899071, 34.247755], [108.898879, 34.24747], [108.89835, 34.247589], [108.898146, 34.247936]]
+        ],
+
+        markers: [],//路径点maeker实例集合
+        markersShip: [ ],//船标点实例
+        markersWater: [],//水质点maeker实例集合
+        markersArae: [],//区域点maeker实例集合
+        markersAraeline: [],//未闭合区域点maeker实例集合
+        markersClean: [],//清洁路线实例
+        areaSign: 0,//区域是否闭合 0未闭合 1 闭合
+        //isdel: 1,//是否允许删除 0 禁止 1 允许
+        //pointType: ,//marker点的类型 0路径 1水质 2区域
+        //shipChooseId: -1,//-1表示未选择，0表示选择0号船依此类推
+        icon:null,
+      }
+    },
+    mounted() {
+      lazyAMapApiLoaderInstance.load().then(() => {
+        map = new AMap.Map('amap-main', {
+          resizeEnable: true, // 是否监控地图容器尺寸变化
+          center: [108.898352, 34.24743], // 中心点坐标
+          expandZoomRange: true, // 设置可扩展最大缩放级别
+          zooms: [15, 20], // 设置地图级别范围
+          zoom: 18, // 级别
+          layers: [ // 使用多个图层
+            new AMap.TileLayer.Satellite(),
+            new AMap.TileLayer.RoadNet()
+          ],
+        });
+
+        polyline = new AMap.Polyline({
+          path: path,
+          borderWeight: 2, // 线条宽度，默认为 1
+          strokeColor: '#61f7f7', // 线条颜色
+          lineJoin: 'round' // 折线拐点连接处样式
+        });
+        polyline.setMap(map);
+
+        arealine = new AMap.Polyline({
+          path: arealinePath,
+          borderWeight: 2, // 线条宽度，默认为 1
+          strokeColor: '#d38fff', // 线条颜色
+          lineJoin: 'round' // 折线拐点连接处样式
+        });
+        arealine.setMap(map);
+
+        cleanline = new AMap.Polyline({
+          path: cleanPath,
+          borderWeight: 2, // 线条宽度，默认为 1
+          strokeColor: '#fff764', // 线条颜色
+          lineJoin: 'round' // 折线拐点连接处样式
+        });
+        polyline.setMap(map);
+
+        map.on('click', this.addMarker);
+        //初始化边界
+        var lnglat;
+        var boundspath = [];
+        for (var i = 0; i < this.bounds.length; i++) {
+          boundspath[i] = new Array();
+          for (var j = 0; j < this.bounds[i].length; j++) {
+            lnglat = new AMap.LngLat(this.bounds[i][j][0], this.bounds[i][j][1]);
+            boundspath[i][j] = lnglat;
+          }
+          boundary[i] = new AMap.Polygon({
+            path: boundspath[i],
+            fillColor: '#f4a762', // 多边形填充颜色
+            fillOpacity: 0,//多边形透明度
+            borderWeight: 2, // 线条宽度，默认为 1
+            strokeColor: '#f4a762', // 线条颜色
+            bubble: true,
+          });
+          map.add(boundary[i]);//添加多边形
+        }
+        //初始化障碍
+        for (var i = 0; i < this.obstacles.length; i++) {
+          boundspath[i] = new Array();
+          for (var j = 0; j < this.obstacles[i].length; j++) {
+            lnglat = new AMap.LngLat(this.obstacles[i][j][0], this.obstacles[i][j][1]);
+            boundspath[i][j] = lnglat;
+          }
+          obstacle[i] = new AMap.Polygon({
+            path: boundspath[i],
+            fillColor: '#ff3d3e', // 多边形填充颜色
+            fillOpacity: 0.5,//多边形透明度
+            borderWeight: 2, // 线条宽度，默认为 1
+            strokeColor: '#ff3d3e', // 线条颜色
+            bubble: true,
+          });
+          map.add(obstacle[i]);//添加多边形
+        }
+        //初始化船图标
+        this.updateShip();
+      });
+    },
+    methods: {
+      //点击地图标点
+      addMarker(e) {
+        if (this.pointType !== 0 && this.pointType !== 1 && this.pointType !== 2 && this.pointType !== 3) return; //标点类型既不是一又不是二又不是三不允许标点
+        console.log(e.lnglat);
+        var isPointInRing = this.isPointInRing(e.lnglat);//是否在边界内
+        // console.log('点击时'+isPointInRing);
+        //console.log('点击地图'+this.pointType);
+        if (!isPointInRing) return;//在边界内return
+        var pointType = this.pointType;
+        //let icon = "";
+        let marker;
+        if (pointType === 0) {  //标路径点
+          marker = new AMap.Marker({
+            icon: this.icon,
+            map: map,
+            offset:new AMap.Pixel(-10, -10),
+            position: e.lnglat,
+            draggable: true,
+            bubble: true,
+            extData: pointType,
+          });
+          this.markers.push(marker);//路径点压入markers实例数组
+          path.push(e.lnglat);//坐标压入路径数组
+          polyline.setPath(path);//设置路径线的路径
+          polyline.setMap(map);//跟新折线实例
+          //console.log(polyline.getPath());
+          marker.on('dragging', this.moveMarker);//绑定按下事件
+          marker.on('mousedown', this.getLngLat);
+          marker.on('dragend', this.afterDrag);
+        } else if (pointType === 1) { //标水质点 基本同路径点
+          marker = new AMap.Marker({
+            icon: this.icon,
+            map: map,
+            position: e.lnglat,
+            offset:new AMap.Pixel(-10, -10),
+            draggable: true,
+            bubble: true,
+            extData: pointType,
+          });
+          this.markersWater.push(marker);
+          waterPath.push(e.lnglat);
+          polyline.setPath(waterPath);
+          polyline.setMap(map);
+          //console.log(polyline.getPath());
+          marker.on('dragging', this.moveMarker);
+          marker.on('mousedown', this.getLngLat);
+          marker.on('dragend', this.afterDrag);
+        } else if (pointType === 2) {  //标区域
+          marker = new AMap.Marker({
+            icon: this.icon,
+            map: map,
+            position: e.lnglat,
+            offset:new AMap.Pixel(-10, -10),
+            draggable: true,
+            bubble: true,
+            extData: pointType,
+          });
+          //console.log(polyline.getPath());
+          this.markersAraeline.push(marker);
+          //this.markersArae.push(marker);
+          arealinePath.push(e.lnglat);
+          //areaPath.push(e.lnglat);
+          arealine.setPath(arealinePath);
+          arealine.setMap(map);
+          marker.on('click', this.addArea);
+          marker.on('mousemove', this.afterAddArea);
+          marker.on('dragging', this.moveMarker);
+          marker.on('mousedown', this.getLngLat);
+          marker.on('dragend', this.afterDrag);
+          //marker.on('dragend',this.moveArea);
+        } else if (pointType === 3) {
+
+          marker = new AMap.Marker({
+            icon: this.icon,
+            map: map,
+            position: e.lnglat,
+            offset:new AMap.Pixel(-10, -10),
+            draggable: true,
+            bubble: true,
+            extData: pointType,
+          });
+          this.markersClean.push(marker);//路径点压入markers实例数组
+          cleanPath.push(e.lnglat);//坐标压入路径数组
+          cleanline.setPath(cleanPath);//设置路径线的路径
+          cleanline.setMap(map);//跟新折线实例
+          marker.on('dragging', this.moveMarker);//绑定按下事件
+          marker.on('mousedown', this.getLngLat);
+          marker.on('dragend', this.afterDrag);
+        }
+      },
+      //移动标记
+      moveMarker(e) {
+        var flag = e.target.getExtData();
+        if (flag === 0) {   //路径点移动
+          path.length = 0;
+          var lnglat;
+          for (var i = 0; i < this.markers.length; i++) {
+            lnglat = new AMap.LngLat(this.markers[i].getPosition().getLng(), this.markers[i].getPosition().getLat());
+            path.push(lnglat);
+          }
+          polyline.setPath(path);
+          polyline.setMap(map);
+        } else if (flag === 1) {  //水质点移动
+          waterPath.length = 0;
+          var lnglat;
+          for (var i = 0; i < this.markersWater.length; i++) {
+            lnglat = new AMap.LngLat(this.markersWater[i].getPosition().getLng(), this.markersWater[i].getPosition().getLat());
+            waterPath.push(lnglat);
+          }
+          polyline.setPath(waterPath);
+          polyline.setMap(map);
+        } else if (flag === 2) {  //区域移动
+          if (this.areaSign === 0) {
+            arealinePath.length = 0;
+            var lnglat;
+            for (var i = 0; i < this.markersAraeline.length; i++) {
+              lnglat = new AMap.LngLat(this.markersAraeline[i].getPosition().getLng(), this.markersAraeline[i].getPosition().getLat());
+              arealinePath.push(lnglat);
+            }
+            arealine.setPath(arealinePath);
+            arealine.setMap(map);
+          } else if (this.areaSign === 1) {
+            areaPath.length = 0;
+            var lnglat;
+            for (var i = 0; i < this.markersArae.length; i++) {
+              lnglat = new AMap.LngLat(this.markersArae[i].getPosition().getLng(), this.markersArae[i].getPosition().getLat());
+              areaPath.push(lnglat);
+            }
+            polygon.setPath(areaPath);
+            polygon.setMap(map);
+          }
+        } else if (flag === 3) {
+          cleanPath.length = 0;
+          var lnglat;
+          for (var i = 0; i < this.markersClean.length; i++) {
+            lnglat = new AMap.LngLat(this.markersClean[i].getPosition().getLng(), this.markersClean[i].getPosition().getLat());
+            cleanPath.push(lnglat);
+          }
+          cleanline.setPath(cleanPath);
+          cleanline.setMap(map);
+        }
+      },
+      //区域移动
+      // moveArea(e){
+      //   if(this.areaSign===1){
+      //     areaPath.length=0;
+      //     var lnglat;
+      //     for (var i=0;i<this.markersArae.length;i++){
+      //       lnglat = new AMap.LngLat(this.markersArae[i].getPosition().getLng(),this.markersArae[i].getPosition().getLat());
+      //       areaPath.push(lnglat);
+      //     }
+      //
+      //       polygon.setPath(areaPath);
+      //       polygon.setMap(map);
+      //   }
+      // },
+      //地图区域划定
+      addArea(e) {
+        map.off('click', this.addMarker);
+        //console.log(e.target.getPosition().getLng());
+        console.log(this.markersAraeline.length);
+        if (!this.markersAraeline[0]) return;
+        if (this.markersAraeline[0].getPosition() === e.target.getPosition()) {
+          this.areaSign = 1;
+          this.markersArae = this.markersAraeline.slice(0);
+          areaPath = arealinePath.slice(0);
+          polygon = new AMap.Polygon({
+            path: areaPath,
+            fillColor: '#61f7f7', // 多边形填充颜色
+            borderWeight: 2, // 线条宽度，默认为 1
+            strokeColor: 'red', // 线条颜色
+          });
+          map.add(polygon);//添加多边形
+          map.remove(arealine);//移除未闭合时路径线
+          copy = this.markersAraeline.slice(0);//保存所有路劲点实例下边删除可用
+          //console.log(copy);
+          this.markersAraeline.length = 0;
+          arealinePath.length = 0;
+          //console.log('路径点'+polyline.getPath())
+        }
+      },
+      afterAddArea(e) {
+        if (this.areaSign === 0) {
+          map.on('click', this.addMarker)
+        }
+      },
+      //删除点
+      // delMarker() {  //标点删除
+      //   if (this.isdel === 1) {
+      //     map.on('click', this.addMarker)
+      //     if (this.pointType === 0) {
+      //       if (this.markers.length === 0) return;
+      //       this.markers[this.markers.length - 1].setMap(null);
+      //       this.markers.pop();
+      //       path.pop();
+      //       polyline.setPath(path);
+      //       polyline.setMap(map);
+      //     } else if (this.pointType === 1) {
+      //       if (this.markersWater.length === 0) return;
+      //       this.markersWater[this.markersWater.length - 1].setMap(null);
+      //       this.markersWater.pop();
+      //       waterPath.pop();
+      //       polyline.setPath(waterPath);
+      //       polyline.setMap(map);
+      //     } else if (this.pointType === 2) {
+      //       if (this.markersAraeline.length === 0 && this.markersArae.length === 0) return;
+      //       if (this.areaSign === 1) {
+      //         this.markersArae.length = 0;
+      //         areaPath.length = 0;
+      //         map.remove(polygon);
+      //         map.remove(copy);
+      //         map.remove(arealine);//防止意外将未闭合的路径线相关均重新移除
+      //         this.markersAraeline.length = 0;
+      //         arealinePath.length = 0;
+      //         this.areaSign = 0;;
+      //       } else {
+      //         this.markersAraeline[this.markersAraeline.length - 1].setMap(null);
+      //         this.markersAraeline.pop();
+      //         //this.markersArae.pop();
+      //         //areaPath.pop();
+      //         arealinePath.pop();
+      //         arealine.setPath(arealinePath);
+      //         arealine.setMap(map);
+      //       }
+      //     }
+      //   }else if (this.isdel === 2){
+      //       if (this.pointType === 1) {
+      //         map.remove(polyline);
+      //         map.remove(this.markersWater);
+      //         this.markersWater.length = 0;
+      //         waterPath.length = 0;
+      //       }else if (this.pointType === 0){
+      //         map.remove(polyline);
+      //         map.remove(this.markers);
+      //         this.markers.length = 0;
+      //         path.length = 0;
+      //       }else if (this.pointType === 2){
+      //         if (this.areaSign === 0){
+      //           map.remove(arealine);
+      //           map.remove(this.markersAraeline);
+      //           this.markersAraeline.length = 0;
+      //           arealinePath.length = 0;
+      //         } else if (this.areaSign === 1){
+      //           map.remove(polygon);
+      //           map.remove(this.markersArae);
+      //           areaPath.length = 0;
+      //           this.markersArae.length = 0;
+      //           copy.length = 0;
+      //           this.areaSign = 0;
+      //           map.on('click', this.addMarker)
+      //         }
+      //       }
+      //   }
+      // },
+      //判断点是否在边界和障碍内
+      isPointInRing(lnglat) {
+        var ismarker = false;
+        for (var i = 0; i < boundary.length; i++) { //不能都是false 有一个true就可以返回 表示可以标点
+          var isPointInRing = AMap.GeometryUtil.isPointInRing(lnglat, boundary[i].getPath());
+          if (isPointInRing) {
+            ismarker = true;
+            break;
+          }
+        }
+        for (var i = 0; i < obstacle.length; i++) {  //都得是false 有一个true 返回 表示不可以标点
+          var isPointInRing = AMap.GeometryUtil.isPointInRing(lnglat, obstacle[i].getPath());
+          if (isPointInRing) {
+            ismarker = false;
+            break;
+          }
+        }
+        return ismarker;
+      },
+      //获取事件发生的marker的开始位置
+      getLngLat(e) {
+        copy2[0] = new AMap.LngLat(e.target.getPosition().getLng(), e.target.getPosition().getLat());
+        console.log(copy2[0]);
+        if (this.pointType === 0) {
+          for (var i = 0; i < this.markers.length; i++) {
+            if (e.target === this.markers[i]) {
+              copy2[1] = i;
+              //console.log(copy[1]);
+              break;
+            }
+          }
+        } else if (this.pointType === 1) {
+          for (var i = 0; i < this.markersWater.length; i++) {
+            if (e.target === this.markersWater[i]) {
+              copy2[1] = i;
+              console.log(copy2[1]);
+              break;
+            }
+          }
+        } else if (this.pointType === 2) {
+          if (this.areaSign === 0) {
+            for (var i = 0; i < this.markersAraeline.length; i++) {
+              if (e.target === this.markersAraeline[i]) {
+                copy2[1] = i;
+                //console.log(copy[1]);
+                break;
+              }
+            }
+          } else if (this.areaSign === 1) {
+            for (var i = 0; i < this.markersArae.length; i++) {
+              if (e.target === this.markersArae[i]) {
+                copy2[1] = i;
+                console.log(copy2[1]);
+                break;
+              }
+            }
+          }
+        } else if (this.pointType === 3) {
+          for (var i = 0; i < this.markersClean.length; i++) {
+            if (e.target === this.markersClean[i]) {
+              copy2[1] = i;
+              //console.log(copy[1]);
+              break;
+            }
+          }
+        }
+      },
+      //拖动后处理
+      afterDrag(e) {
+        var lnglat = new AMap.LngLat(e.target.getPosition().getLng(), e.target.getPosition().getLat());
+        var isPointInRing = this.isPointInRing(lnglat);
+        console.log('拖动后' + isPointInRing);
+        if (!isPointInRing) {
+          if (this.pointType === 0) {
+            path.length = 0;
+            this.markers[copy2[1]].setPosition(copy2[0]);
+            var lnglat2;
+            for (var i = 0; i < this.markers.length; i++) {
+              lnglat2 = new AMap.LngLat(this.markers[i].getPosition().getLng(), this.markers[i].getPosition().getLat());
+              path.push(lnglat2);
+            }
+            polyline.setPath(path);
+            polyline.setMap(map);
+          } else if (this.pointType === 1) {
+            waterPath.length = 0;
+            this.markersWater[copy2[1]].setPosition(copy2[0]);
+            var lnglat2;
+            for (var i = 0; i < this.markersWater.length; i++) {
+              lnglat2 = new AMap.LngLat(this.markersWater[i].getPosition().getLng(), this.markersWater[i].getPosition().getLat());
+              waterPath.push(lnglat2);
+            }
+            polyline.setPath(waterPath);
+            polyline.setMap(map);
+          } else if (this.pointType === 2) {
+            if (this.areaSign === 0) {
+              arealinePath.length = 0;
+              this.markersAraeline[copy2[1]].setPosition(copy2[0]);
+              var lnglat2;
+              for (var i = 0; i < this.markersAraeline.length; i++) {
+                lnglat2 = new AMap.LngLat(this.markersAraeline[i].getPosition().getLng(), this.markersAraeline[i].getPosition().getLat());
+                arealinePath.push(lnglat2);
+              }
+              arealine.setPath(arealinePath);
+              arealine.setMap(map);
+            } else if (this.areaSign === 1) {
+              areaPath.length = 0;
+              this.markersArae[copy2[1]].setPosition(copy2[0]);
+              var lnglat2;
+              for (var i = 0; i < this.markersArae.length; i++) {
+                lnglat2 = new AMap.LngLat(this.markersArae[i].getPosition().getLng(), this.markersArae[i].getPosition().getLat());
+                areaPath.push(lnglat2);
+              }
+
+              polygon.setPath(areaPath);
+              polygon.setMap(map);
+            }
+          } else if (this.pointType === 3) {
+            cleanPath.length = 0;
+            this.markersClean[copy2[1]].setPosition(copy2[0]);
+            var lnglat2;
+            for (var i = 0; i < this.markersClean.length; i++) {
+              lnglat2 = new AMap.LngLat(this.markersClean[i].getPosition().getLng(), this.markersClean[i].getPosition().getLat());
+              cleanPath.push(lnglat2);
+            }
+            cleanline.setPath(cleanPath);
+            cleanline.setMap(map);
+          }
+        }
+      },
+      //更新船
+      updateShip() {
+        var lnglat;
+        if (this.markersShip !== 0){
+          map.remove(this.markersShip);
+        }
+        for(var i = 0;i<this.ship.length;i++) {
+          lnglat = new AMap.LngLat(this.ship[i][0],this.ship[i][1]);
+          this.markersShip[i] = new AMap.Marker({
+            icon: shipIcon,
+            map: map,
+            angle: this.shipAngle[i],
+            position: lnglat,
+            extData: i,
+          });
+          this.markersShip[i].on('click',this.chooseShip);
+        }
+      },
+      //选择船
+      chooseShip(e) {
+        var lnglat = new AMap.LngLat(e.target.getPosition().getLng(),e.target.getPosition().getLat());
+        map.setCenter(lnglat);
+        this.shipChooseId = e.target.getExtData();
+        //console.log(this.shipChooseId);
+      },
+      //初始化图标
+      initIcon(){
+        if (this.pointType === 0){
+          this.icon = new AMap.Icon({
+            image: roadIcon,
+            imageSize: new AMap.Size(18, 18),
+          })
+        }else if (this.pointType === 1){
+          this.icon = new AMap.Icon({
+            image: waterIcon,
+            imageSize: new AMap.Size(18, 18),
+          })
+        }else if (this.pointType === 2){
+          this.icon = new AMap.Icon({
+            image: areaIcon,
+            imageSize: new AMap.Size(18, 18),
+          })
+        }else if (this.pointType === 3){
+          this.icon = new AMap.Icon({
+            image: areaRoadIcon,
+            imageSize: new AMap.Size(18, 18),
+          })
+        }
+      }
+
+    },
+    computed: {
+      pointType() {
+        return this.msg.pointType
+      },
+      isdel() {
+        return this.msg.isdel
+      },
+      ship(){
+        return this.msg.ship
+      },
+      shipRoad(){
+        return this.msg.shipRoad
+      },
+      shipChooseId :{
+        get(){
+          return this.msg.shipChooseId
+        },
+        set(shipId){
+          this.msg.shipChooseId = shipId;
+        }
+      },
+      shipAngle(){
+        return this.msg.shipAngle
+      },
+    },
+    watch: {
+      pointType(newType, oldType) {
+
+        if (newType === 3){
+          map.on('click', this.addMarker);
+        }
+        if (newType !== -1){
+          this.initIcon();
+          console.log(this.icon);
+        }
+        if (oldType === 1) {
+          map.remove(polyline);
+          map.remove(this.markersWater);
+          this.markersWater.length = 0;
+          waterPath.length = 0;
+        } else if (oldType === 0) {
+          map.remove(polyline);
+          map.remove(this.markers);
+          this.markers.length = 0;
+          path.length = 0;
+        } else if (oldType === 2&&newType !== 3) {
+          if (this.markersClean.length !== 0){
+            map.remove(cleanline);
+            map.remove(this.markersClean);
+            this.markersClean.length = 0;
+            cleanPath.length = 0;
+          }
+          if (this.areaSign === 0) {
+            map.remove(arealine);
+            map.remove(this.markersAraeline);
+            this.markersAraeline.length = 0;
+            arealinePath.length = 0;
+          } else if (this.areaSign === 1) {
+            map.remove(polygon);
+            map.remove(this.markersArae);
+            areaPath.length = 0;
+            this.markersArae.length = 0;
+            copy.length = 0;
+            this.areaSign = 0;
+            map.on('click', this.addMarker)
+          }
+        }else if (oldType === 3&&newType !==2){
+          map.remove(cleanline);
+          map.remove(this.markersClean);
+          this.markersClean.length = 0;
+          cleanPath.length = 0;
+          if (this.areaSign === 0) {
+            map.remove(arealine);
+            map.remove(this.markersAraeline);
+            this.markersAraeline.length = 0;
+            arealinePath.length = 0;
+          } else if (this.areaSign === 1) {
+            map.remove(polygon);
+            map.remove(this.markersArae);
+            areaPath.length = 0;
+            this.markersArae.length = 0;
+            copy.length = 0;
+            this.areaSign = 0;
+            map.on('click', this.addMarker)
+          }
+        }
+      },
+      //监听删除
+      isdel(newIs, oldIs) {
+        //等于1撤销
+        if (newIs % 2 === 1) {
+          map.on('click', this.addMarker)
+          if (this.pointType === 0) {
+            if (this.markers.length === 0) return;
+            this.markers[this.markers.length - 1].setMap(null);
+            this.markers.pop();
+            path.pop();
+            polyline.setPath(path);
+            polyline.setMap(map);
+          } else if (this.pointType === 1) {
+            if (this.markersWater.length === 0) return;
+            this.markersWater[this.markersWater.length - 1].setMap(null);
+            this.markersWater.pop();
+            waterPath.pop();
+            polyline.setPath(waterPath);
+            polyline.setMap(map);
+          } else if (this.pointType === 2) {
+            if (this.markersAraeline.length === 0 && this.markersArae.length === 0) return;
+            if (this.areaSign === 1) {
+              this.markersArae.length = 0;
+              areaPath.length = 0;
+              map.remove(polygon);
+              map.remove(copy);
+              map.remove(arealine);//防止意外将未闭合的路径线相关均重新移除
+              this.markersAraeline.length = 0;
+              arealinePath.length = 0;
+              this.areaSign = 0;
+              ;
+            } else {
+              this.markersAraeline[this.markersAraeline.length - 1].setMap(null);
+              this.markersAraeline.pop();
+              //this.markersArae.pop();
+              //areaPath.pop();
+              arealinePath.pop();
+              arealine.setPath(arealinePath);
+              arealine.setMap(map);
+            }
+          } else if (this.pointType === 3) {
+            if (this.markersClean.length === 0) return;
+            this.markersClean[this.markersClean.length - 1].setMap(null);
+            this.markersClean.pop();
+            cleanPath.pop();
+            cleanline.setPath(cleanPath);
+            cleanline.setMap(map);
+          }
+        } else if (newIs % 2 === 0) {  //等于0全部删除
+          if (this.pointType === 1) {
+            map.remove(polyline);
+            map.remove(this.markersWater);
+            this.markersWater.length = 0;
+            waterPath.length = 0;
+          } else if (this.pointType === 0) {
+            map.remove(polyline);
+            map.remove(this.markers);
+            this.markers.length = 0;
+            path.length = 0;
+          } else if (this.pointType === 2) {
+            if (this.areaSign === 0) {
+              map.remove(arealine);
+              map.remove(this.markersAraeline);
+              this.markersAraeline.length = 0;
+              arealinePath.length = 0;
+            } else if (this.areaSign === 1) {
+              map.remove(polygon);
+              map.remove(this.markersArae);
+              areaPath.length = 0;
+              this.markersArae.length = 0;
+              copy.length = 0;
+              this.areaSign = 0;
+              map.on('click', this.addMarker)
+            }
+          } else if (this.pointType === 3) {
+            map.remove(cleanline);
+            map.remove(this.markersClean);
+            this.markersClean.length = 0;
+            cleanPath.length = 0;
+          }
+        }
+      },
+      ship(newShip, oldShip){
+        this.updateShip();
+      },
+      shipAngle(newAngle,oldAngle){
+        this.updateShip();
+      },
+      shipChooseId(newId,oldId){
+        var lnglat = new AMap.LngLat(this.ship[newId][0],this.ship[newId][1]);
+        map.setCenter(lnglat)
+      }
+    }
+
+  }
+</script>
