@@ -43,7 +43,7 @@
             <popover placement="bottom" style="margin:0px;">
               <div slot="content" class="popover-demo-content">
                 <div v-for="ship in shipList" >
-                  <x-button @click.native="confirmShow(ship.value)" style="padding:10px 20px 10px 20px; background-color:#35495e;border-style:hidden;color:white">{{ship.name}}</x-button>
+                  <x-button @click.native="confirmShow(ship)" style="padding:10px 20px 10px 20px; background-color:#35495e;border-style:hidden;color:white">{{ship.name}}</x-button>
                   <hr>
                 </div>
               </div>
@@ -130,9 +130,9 @@
         shipList:[{name:'浐灞121231231' ,value:0},{name:'兴庆3dsvsvwdvds',value:1}],
         ship:['浐灞'],
         show:false,
-        present:0,
+       // present:0,
         temp:0,
-        
+
       }
     },
     mounted() {
@@ -143,18 +143,21 @@
       onCancel () {
         console.log('on cancel')
       },
-      onConfirm (msg) {
+      onConfirm (msg) {//确定要换一艘船
         console.log('on confirm')
         if (msg) {
-          alert(msg)
+          alert(msg);
         }
-        this.present = this.temp;  //把船换了
+       // this.present = this.temp.value;  //把刚才临时保存的值给当前的值
+        this.$store.commit('shipChooseId',this.temp.value);
+        this.headerTop = this.temp.name;
        // 确定要切换船，就要切换
 
       },
-      confirmShow(id){
+      confirmShow(ship){
         this.show = true;
-        this.temp = id;
+        this.temp = ship;//临时把这个船的id存起来
+
       },
 
       drawerToggle() {
@@ -298,5 +301,7 @@
     margin-right: 5px;
 
   }
-
+  .my-btn :focus{//点击按钮之后没有边框
+    outline: 0;
+  }
 </style>

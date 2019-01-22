@@ -7,7 +7,7 @@
       :hide-on-blur="false"
       :show-mask="false">
       <div class="detect-show">
-        <icon v-bind:status="status" v-bind:type="'2'"></icon>
+        <icon v-bind:status="status" v-bind:type="'2'" ></icon>
       </div>
     </popup>
   </div>
@@ -32,6 +32,7 @@
     },
     computed: {
       status(){
+        //return this.$store.getters.curr_state[this.id]+"";
         return "0";
       },
       showPopup: {
@@ -48,6 +49,7 @@
         },
       }
     },
+    props:['id'],
     data () {
       return {
 

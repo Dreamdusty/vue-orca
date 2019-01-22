@@ -13,5 +13,9 @@ export const userLogin = (params) => {
 export const selectBound = (params) => {
   return http.get(`/api/mobile/bound/list?${stringify(params)}`);
 };
+export const addRoute = (params) => {
+  return http.post('/api/mobile/route/insert',params);
+};
+
 
 

@@ -83,8 +83,18 @@
             // })
             // this.$toast();
             this.$toast(res.data.message);
-          } else {
+          } else {//当登录成功的时候，还需要将store中的变量初始化一下。
+           /* this.$store.commit('curr_state',new Array(res.data.data.totalShip));
+            this.$store.commit('curr_lat',new Array(res.data.data.totalShip));
+            this.$store.commit('curr_lng',new Array(res.data.data.totalShip));
+            this.$store.commit('curr_yaw',new Array(res.data.data.totalShip));
+            this.$store.commit('curr_percen',new Array(res.data.data.totalShip));
+            this.$store.commit('rame_time',new Array(res.data.data.totalShip));
+            this.$store.commit('curr_battle',new Array(res.data.data.totalShip));
+            this.$store.commit('curr_speed',new Array(res.data.data.totalShip));*/
+
             this.$router.push('/home');
+            setCookie('account',this.account);
             setCookie('shipId', res.data.data.shipId);
             setCookie('totalShip', res.data.data.totalShip);
           }

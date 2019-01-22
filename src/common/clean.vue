@@ -16,6 +16,9 @@
 <script>
   import { Popup, XButton, Grid, GridItem } from 'vux'
   import Icon from '../components/icon.vue'
+  import variable from '../utils/global/variable'
+  import {getCookie, changeState} from "../utils/cookie";
+
   export default {
     name: "detect",
     components: {
@@ -34,7 +37,8 @@
       }*/
     },
     computed: {
-      status(){
+      status:function(){
+        //return this.$store.getters.curr_state[this.id]+"";
         return "0";
       },
       showPopup: {
@@ -46,17 +50,21 @@
             if (value) {
               this.$store.commit('cruiseShow', false);
               this.$store.commit('detectShow', false);
+              //检测切换事件
             }
           }
         },
       }
     },
+
     data () {
       return {
 
 
       };
+
     },
+    props:['id'],
   }
 </script>
 

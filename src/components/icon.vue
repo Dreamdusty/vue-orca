@@ -51,18 +51,17 @@
       </popup>
     </div>
     <!-- <div>选择检测时间</div>时间范围为5到15秒，用那种表一样的滑动-->
-  <!--  <div v-transfer-dom>
+    <div v-transfer-dom>
       <popup v-model="timeSelect" position="bottom" height="50%"  @on-hide="closeTimeSelect"
              :is-transparent="false"
              :show-mask="false">
         <div class="popup">
           <group-title>这是什么</group-title>
-          <picker :data='times' v-model='time'></picker>
+          <picker :data='timelist' v-model='time'></picker>
           <x-button type="primary" @click.native="setTimeChange" style="width:100px;margin-top:30px" >确定</x-button>
         </div>
       </popup>
-
-    </div>-->
+    </div>
 
 
 
@@ -72,8 +71,8 @@
 </template>
 
 <script>
-  import { TabbarItem,TransferDom,Popup,InlineXNumber,XButton,Grid,GridItem,Selector,Group,Popover,Checklist,Picker} from 'vux'
-
+  import { TabbarItem,TransferDom,Popup,InlineXNumber,XButton,Grid,GridItem,Selector,Group,Popover,Checklist,Picker,GroupTitle} from 'vux'
+  import { addRoute } from "../api/api";
   // let 可以改变值， const 不可改变值
   let sign= {name:'标点', src:'../static/image/logo.png', func: this.fsign};
   //let signRegion = {name:'标点', src:'../static/image/logo.png', func: this.fsign};
@@ -103,7 +102,7 @@
   let onegroupfu1 = [reStartTask,startBack,endTask];
 
 
-  let twogroup0 = [sign, deleteOne, clear, cricle , detectionTime,backMethod];//刚上电状态
+  let twogroup0 = [sign, deleteOne, clear, cricle , detectionTime,backMethod,startTask];//刚上电状态
   let twogroup1 = [startTask, stopTask, startBack,backMethod];//任务进行中
   let twogroupfu11 = [];    //关机状态无功能，但是如果是空的的话会难看
   let twogroupfu10 = [];//待机状态暂时不考虑
@@ -112,7 +111,7 @@
   let twogroupfu2 = [stopBack,endBack,endTask];//返航中
   let twogroupfu1 = [reStartTask,startBack,endTask,backMethod];
   //需要确定清理方式目前是怎么定的
-  let threegroup0 = [sign,deleteOne, clear, cricle ,backMethod];//刚上电状态
+  let threegroup0 = [sign,deleteOne, clear, cricle ,startTask];//刚上电状态,backMethod
   let threegroup1 = [startTask, stopTask, startBack,backMethod];//任务进行中
   let threegroupfu11 = [];    //关机状态无功能，但是如果是空的的话会难看
   let threegroupfu10 = [];//待机状态暂时不考虑
@@ -121,23 +120,17 @@
   let threegroupfu2 = [stopBack,endBack,endTask];//返航中
   let threegroupfu1 = [reStartTask,startBack,endTask,backMethod];
 
-  let times = [];
-  for(let i=5;i<= 15;i++){
-    times.push({
-      name:i+"秒",
-      value:i+"",
-    })
-  }
+  let times = [[{name:'5秒',value:5},{name:'6秒',value:6},{name:'7秒',value:7},
+    {name:'8秒',value:8},{name:'9秒',value:9},{name:'10秒',value:10},
+    {name:'11秒',value:11},{name:'12秒',value:12},{name:'13秒',value:13},
+    {name:'14秒',value:14},{name:'15秒',value:15}]];
+
   let i=0;
 
-
-  //let icons=[icon1,icon2,icon3,icon4];
   export default {
     name: "icon",
     data() {
       return {
-
-        realStatus:this.status,
         title:'sign',
         //循环圈数
         cricleShow:false,
@@ -150,7 +143,7 @@
         signMethodSelect:false,
         signMethodList:['路径点','区域点'],
         signMethod:['路径点'],  //0路径点 1水质点 2区域点
-        signMethodToFather:0,
+        signMethodToFather:-1,
 
 
         //是否撤销 0不能撤销，1 撤销上一个，2全部撤销
@@ -166,7 +159,7 @@
         backMethodToFather:'原路返航',
 
       //检测时间
-        times:times,
+        timelist:times,
         timeSelect:false,
         time :['5'],
         timeToFather:'5',
@@ -175,23 +168,29 @@
         deleteOne:false,//如何告诉对方要撤销一个点？
         deleteAll:false,//全部撤销。
 
+        startTask:0,
+
       }
     },
     computed:{
       icons(){
-        console.log("张涵想要的数据："+this.realStatus);
+        console.log("张涵想要的数据："+this.status);
+       /* if(this.realStatus>0){
+          this.realStatus='1';
+        }*/
         if(this.type+""==="3")
         {
           this.type = "3";
-          console.log("此时的状态"+this.type);
-          switch(this.realStatus){
+          console.log("此时的类型"+this.type);
+
+          switch(this.status){
             case '0':
               console.log("eeeee");
               return threegroup0;
             case '-11':
               return threegroupfu11;
-            case '0':
-              return threegroup0;
+            case '1':
+              return threegroup1;
             case '-10':
               return threegroupfu10;
             case '-4':
@@ -205,14 +204,14 @@
             default:
               break;
           }
-          if(this.realStatus>0){
-            return threegroup1;
+          if(this.status>0){
+            return twogroup1;
           }
         }
         else if(this.type+""==="2"){
           this.type = "2";
           console.log("此时的状态"+this.type);
-          switch(this.realStatus){
+          switch(this.status){
             case '0':
               return twogroup0;
             case '-11':
@@ -232,14 +231,14 @@
             default:
               break;
           }
-          if(this.realStatus>0){
+          if(this.status>0){
             return twogroup1;
           }
 
         }else if(this.type+""==="1"){
           this.type = "1";
           console.log("此时的状态"+this.type);
-          switch(this.realStatus){
+          switch(this.status){
             case '0':
               return onegroup0;
             case '-11':
@@ -259,7 +258,7 @@
             default:
               break;
           }
-          if(this.realStatus>0){
+          if(this.status>0){
             return onegroup1;
           }
         }
@@ -269,7 +268,7 @@
     methods: {
       fsign() {
         if(this.type==="3"){
-          this.canSign=1;
+          this.canSign = 1;
           this.signMethodSelect = true;
         }else{
           this.canSign = 1;
@@ -305,9 +304,15 @@
 
         this.cricleShow=true;
       },
-      fstartTask() {//
+      fstartTask() {
         this.canSign = 0;
-        this.$store.commit('canSign',0);
+        this.$store.commit('canSign',0);  //不准标点了
+       // this.signMethodToFather= -1;
+      //  this.$store.commit('signMethod',-1);  //不准标点了
+       // let route=this.$store.getters.route;
+        this.startTask =(this.startTask +1)%10;
+        let temp =[parseInt(this.type),this.startTask];
+       this.$store.commit("startTask",temp);
       },
       fendTask() {
 
@@ -340,6 +345,7 @@
 
       },
       fdetectionTime() {
+        this.timeSelect = true;
         this.canSign = 0;
         this.$store.commit('canSign',0);  //不准标点了
 
@@ -386,11 +392,7 @@
 
          this.closeCricleShow();
          this.cricleNumToFather = this.cricleNum;
-         //使用$emit来触发一个自定义事件，并传递参数
-        /* if(this.cricleNum+""!=="1") {
-          this.$emit("CricleNumChange", this.cricleNum);
 
-         }*/
        },
        closeCricleShow(){
          //one 代码巡航功能，two代表水质功能 ，three清洁功能
@@ -413,8 +415,7 @@
         }else if(this.signMethod[0]==="区域点"){
           this.signMethodToFather=2;
         }
-
-        this.$store.commit('canSign', this.canSign);
+        this.$store.commit('canSign',this.canSign);
         this.$store.commit('signMethod', this.signMethodToFather);
 
       },
@@ -432,15 +433,17 @@
       closeTimeSelect(){
         this.timeSelect = false;
       },
-      setTimeChange(){
+      setTimeChange() {
         this.timeToFather = this.time;
-        this.timeSelect =false;
-      }
-
-
-
+        this.timeSelect = false;
+      },
     },
     props:['status','type'],
+    watch:{
+      status:function(val) {
+      console.log("prop变化了没有"+val);
+      },
+    },
     components: {
       Grid,
       GridItem,
@@ -453,6 +456,7 @@
       Popover,
       Checklist,
       Picker,
+      GroupTitle,
     },
     directives: {
       TransferDom

@@ -10,11 +10,15 @@
         <icon v-bind:status="status" v-bind:type="'1'"></icon>
       </div>
     </popup>
+<!--&lt;!&ndash;    &lt;!&ndash;<p>这里欠缺一个alert，当当前船的状态是-11或者-10的时候，需要告诉用户</p>&ndash;&gt;
+    <div v-transfer-dom>
+      <alert v-model="show" :title="'亲'">当前船未开机，请先开机</alert>
+    </div>-->
   </div>
 </template>
 
 <script>
-  import { Popup, XButton, Grid, GridItem } from 'vux'
+  import { Popup, XButton, Grid, GridItem,TransferDom,Alert} from 'vux'
   import Icon from '../components/icon.vue'
   export default {
     name: "detect",
@@ -24,6 +28,7 @@
       Grid,
       GridItem,
       Icon,
+      Alert,
     },
     methods: {
       onTabbarIndex() {
@@ -32,6 +37,7 @@
     },
     computed: {
       status(){
+        //return this.$store.getters.curr_state[this.id]+"";
         return "0";
       },
       showPopup: {
@@ -39,19 +45,30 @@
           return this.$store.getters.cruiseShow
         },
         set(value) {
+         // let num_id = parseInt(this.id);
+         /* if(this.status==="-11"){
+            this.show = true;
+          }
+          console.log("zzzzzzzzzzzz");*/
+
           if (this.$store.getters.detectShow || this.$store.getters.cleanShow) {
             if (value) {
               this.$store.commit('detectShow', false);
               this.$store.commit('cleanShow', false);
             }
           }
+
         },
       }
     },
+    props:['id'],
     data () {
       return {
-
+        show:false,//用于未上电状态的提醒。
       };
+    },
+    directives: {
+      TransferDom
     },
   }
 </script>

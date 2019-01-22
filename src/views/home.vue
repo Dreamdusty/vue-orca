@@ -5,9 +5,9 @@
     <Ocmap v-bind:msg="msg" ></Ocmap>
     <div v-for="n in count">
       <div v-model="chuans[n]">
-        <cruise></cruise>
-        <clean></clean>
-        <detect></detect>
+        <cruise v-bind:id="n"></cruise>
+        <clean v-bind:id="n"></clean>
+        <detect v-bind:id="n"></detect>
       </div>
     </div>
   </div>
@@ -18,6 +18,7 @@
   import Clean from '../common/clean'
   import Detect from '../common/detect'
   import Ocmap from '../common/Ocmap'
+
   import { selectBound } from "../api/api";
   import { getCookie } from "../utils/cookie";
   import { rayCasting, rayBarrier } from "../utils/route/routeMapLoading";
@@ -30,10 +31,12 @@
     name: "home",
     data() {
       return {
-        count: 2,
-        present: 1,
-        chuans: [true, false, false, false, false, false, false, false],
-
+        // getCookie("totalShip")
+        count:2,
+        present:1,  //this.$store.getters.shipChooseId,
+       /* chuans: [
+          true, false, false, false, false, false, false, false],
+*/
       }
     },
     computed: {
@@ -49,14 +52,26 @@
             shipChooseId: 0,//当前选中船的ID
             CurrentTaskId: -1,//当前所选船的任务id -1表示当没有任务 0巡航任务 1 水质任务 2区域任务
             CurrentTaskPath:[],//当前任务路径点
+            startTask: this.$store.getters.startTask,
           }
        },
-      deletePoint(){
-        return this.$store.getters.canDelete;
-      }
+      chuans(){
+        let temp =[];
+        let object = false;
+        for(let i=0;i<this.count;i++){
+          object = false;
+          if(i===this.present) {
+            object = true;
+          }
+          temp.push(object);
+
+        }
+        console.log(temp);
+        return temp;
+      },
+
+
     },
-    //父子传参只能用prop
-    //  prop:['count','present'],
     watch: {
       present: function (data) {//观察到当前船变化就改变当前船
         let temp = this.chuans;

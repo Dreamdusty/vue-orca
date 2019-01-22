@@ -22,3 +22,6 @@ export function delCookie (name) {
   if (cval != null)
     document.cookie = name + "=" + cval + ";expires=" + exp.toGMTString();
 }
+export function changeState(value){
+  setCookie("state",value);
+}
