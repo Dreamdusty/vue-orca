@@ -4,7 +4,8 @@
     <!--<p>这里其实根据船的数目有多个</p>-->
     <Ocmap v-bind:msg="msg" ></Ocmap>
     <div v-for="n in count">
-      <div v-model="chuans[n]">
+      <div v-model="m">
+        <p>1111n</p>
         <cruise v-bind:id="n"></cruise>
         <clean v-bind:id="n"></clean>
         <detect v-bind:id="n"></detect>
@@ -32,8 +33,9 @@
     data() {
       return {
         // getCookie("totalShip")
-        count:2,
+        count:4,
         present:1,  //this.$store.getters.shipChooseId,
+        m:false,
        /* chuans: [
           true, false, false, false, false, false, false, false],
 */
@@ -43,16 +45,8 @@
       msg(){//船的数目
           return {
             id: this.present,
-            pointType: this.$store.getters.signMethod,
-            canSign: this.$store.getters.canSign,
-            isdel:this.$store.getters.canDelete,
-            ship: [[108.89662,34.247559], [108.898846, 34.247005]],//所有船坐标
+            ship: [[108.89662,34.247559], [108.898846, 34.247005],[108.896368,34.248526]],//所有船坐标
             shipRoad: [],//所有船走的所有路径点
-            shipAngle: [90,30],//所有船角度
-            shipChooseId: 0,//当前选中船的ID
-            CurrentTaskId: -1,//当前所选船的任务id -1表示当没有任务 0巡航任务 1 水质任务 2区域任务
-            CurrentTaskPath:[],//当前任务路径点
-            startTask: this.$store.getters.startTask,
           }
        },
       chuans(){
@@ -60,7 +54,7 @@
         let object = false;
         for(let i=0;i<this.count;i++){
           object = false;
-          if(i===this.present) {
+          if(i===this.$store.getters.shipChooseId) {
             object = true;
           }
           temp.push(object);

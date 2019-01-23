@@ -1,11 +1,13 @@
 <template>
   <div class="clean-popup">
+
     <popup
       v-model="showPopup"
       height="217px"
       :is-transparent="true"
       :hide-on-blur="false"
       :show-mask="false">
+      <p>111111{{id}}</p>
       <div class="clean-show">
         <icon v-bind:status="status" v-bind:type="'3'"></icon>
       </div>
@@ -38,8 +40,8 @@
     },
     computed: {
       status:function(){
-        //return this.$store.getters.curr_state[this.id]+"";
-        return "0";
+        return this.$store.getters.curr_state[this.id]+"";
+       // return "0";
       },
       showPopup: {
         get() {

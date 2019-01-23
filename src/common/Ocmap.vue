@@ -28,25 +28,26 @@
   import roadIcon from '../../static/image/1.png';
   import waterIcon from '../../static/image/2.png';
   import shipIcon from '../../static/image/Ship.png';
+  import shipIcon2 from '../../static/image/ship2.png'
   import areaIcon from '../../static/image/3.png';
   import areaRoadIcon from '../../static/image/4.png';
   import { insertShipRoute } from '../api/api';
 
   let map;//地图实例
   let polyline;//路径折线
+  let path = [];//路径点
   let arealine;//区域未闭合前的直线
+  let arealinePath = [];//区域未闭合时的点
   let cleanline;//清洁路线实例
+  let cleanPath = [];//情节路线
   let polygon;//区域
+  let areaPath = [];//区域点
   let boundary = []; //边界区域实例集合
   let obstacle = []; //障碍区域物实例集合
-  let that = this;
-  var path = [];//路径点
-  var waterPath = [];//水质点
-  var areaPath = [];//区域点
-  var arealinePath = [];//区域未闭合时的点
-  var cleanPath = [];//情节路线
-  var copy = [];//临时保存数据的数组
-  var copy2 = [];
+  let waterline = [];
+  let waterPath = [];//水质点
+  let copy = [];//临时保存数据的数组
+  let copy2 = [];
 
   export default {
     props: ['msg'],
@@ -72,6 +73,7 @@
         //pointType: ,//marker点的类型 0路径 1水质 2区域
         //shipChooseId: -1,//-1表示未选择，0表示选择0号船依此类推
         icon:null,
+        activeTaskList: [],
       }
     },
     mounted() {
@@ -198,10 +200,18 @@
         polyline = new AMap.Polyline({
           path: path,
           borderWeight: 2, // 线条宽度，默认为 1
-          strokeColor: '#fff764', // 线条颜色
+          strokeColor: '#61f7f7', // 线条颜色
           lineJoin: 'round' // 折线拐点连接处样式
         });
         polyline.setMap(map);
+
+        waterline = new AMap.Polyline({
+          path: path,
+          borderWeight: 2, // 线条宽度，默认为 1
+          strokeColor: '#d38fff', // 线条颜色
+          lineJoin: 'round' // 折线拐点连接处样式
+        });
+        waterline.setMap(map);
 
         arealine = new AMap.Polyline({
           path: arealinePath,
@@ -217,7 +227,7 @@
           strokeColor: '#fff764', // 线条颜色
           lineJoin: 'round' // 折线拐点连接处样式
         });
-        polyline.setMap(map);
+        cleanline.setMap(map);
       },
       //点击地图标点
       addMarker(e) {
@@ -262,8 +272,8 @@
           });
           this.markersWater.push(marker);
           waterPath.push(e.lnglat);
-          polyline.setPath(waterPath);
-          polyline.setMap(map);
+          waterline.setPath(waterPath);
+          waterline.setMap(map);
           //console.log(polyline.getPath());
           marker.on('dragging', this.moveMarker);
           marker.on('mousedown', this.getLngLat);
@@ -333,8 +343,8 @@
             lnglat = new AMap.LngLat(this.markersWater[i].getPosition().getLng(), this.markersWater[i].getPosition().getLat());
             waterPath.push(lnglat);
           }
-          polyline.setPath(waterPath);
-          polyline.setMap(map);
+          waterline.setPath(waterPath);
+          waterline.setMap(map);
         } else if (flag === 2) {  //区域移动
           if (this.areaSign === 0) {
             arealinePath.length = 0;
@@ -394,8 +404,8 @@
             areaPath = arealinePath.slice(0);
             polygon = new AMap.Polygon({
               path: areaPath,
-              fillColor: '#61f7f7', // 多边形填充颜色
-              fillOpacity: 0.5,
+              fillColor: '#dcfffd', // 多边形填充颜色
+              fillOpacity: 0.33,
               borderWeight: 2, // 线条宽度，默认为 1
               strokeColor: '#61f7f7', // 线条颜色
             });
@@ -576,8 +586,8 @@
               lnglat2 = new AMap.LngLat(this.markersWater[i].getPosition().getLng(), this.markersWater[i].getPosition().getLat());
               waterPath.push(lnglat2);
             }
-            polyline.setPath(waterPath);
-            polyline.setMap(map);
+            waterline.setPath(waterPath);
+            waterline.setMap(map);
           } else if (this.pointType === 2) {
             if (this.areaSign === 0) {
               arealinePath.length = 0;
@@ -629,6 +639,7 @@
             }
           }
           this.$store.commit("root",pathData);
+          this.activeTaskList[this.shipChooseId] ='0;'+pathData;
           console.log(pathData);
         } else if (Type === 2&&this.pointType === 1){
           if (this.markersWater.length === 0){
@@ -641,6 +652,7 @@
           }
           console.log(pathData);
           this.$store.commit("root",pathData);
+          this.activeTaskList[this.shipChooseId] = '1;'+pathData;
         } else  if (Type === 3&&(this.pointType === 2||this.pointType === 3)){
           if (this.areaSign === 0 ){
             console.log('区域未闭合无法开始任务');
@@ -654,10 +666,13 @@
             for (var i=0;i<this.markersArae.length;i++){
               areaData = areaData+this.markersArae[i].getPosition().getLng()+','+this.markersArae[i].getPosition().getLat()+';';
             }
+            areaData = areaData+this.markersArae[0].getPosition().getLng()+','+this.markersArae[0].getPosition().getLat()+';';
             console.log(pathData);
             console.log(areaData);
             this.$store.commit("root",pathData);
             this.$store.commit("area",areaData);
+            pathData = '2;'+areaData+pathData;
+            this.activeTaskList[this.shipChooseId] = pathData;
           }
         }else{
           return
@@ -731,14 +746,103 @@
           }
         }
         return false;
+      },
+      //数据转化1;1,1;这种数据类型转化为坐标集合
+      parseData(lnglat){
+        lnglat = lnglat.slice(1,lnglat.length);
+        for (var i=0;i<lnglat.length;i++){
+          lnglat[i] = lnglat[i].split(",");
+          lnglat[i][0] = parseFloat(lnglat[i][0]);
+          lnglat[i][1] = parseFloat(lnglat[i][1]);
+          lnglat[i] = new AMap.LngLat(lnglat[i][0],lnglat[i][1]);
+        }
+        return lnglat;
+      },
+      //任务重现
+      loadActiveTask(activeTask){
+        let marker;
+        var lnglat = activeTask.split(";");
+        lnglat.length = lnglat.length-1;
+        if (lnglat[0] === '0'){
+          this.$store.commit("signMethod",0);
+          this.$store.commit("canSign",0);
+          this.icon = new AMap.Icon({
+            image: roadIcon,
+            imageSize: new AMap.Size(18, 18),
+          });
+          lnglat = this.parseData(lnglat);
+          for (var i=0;i<lnglat.length;i++){
+            marker = new AMap.Marker({
+              icon: this.icon,
+              map: map,
+              offset:new AMap.Pixel(-10, -10),
+              position: lnglat[i],
+              draggable: false,
+              bubble: true,
+              extData: 0,
+            });
+            this.markers.push(marker);//路径点压入markers实例数组
+            path.push(lnglat[i]);//坐标压入路径数组
+            polyline.setPath(path);//设置路径线的路径
+            polyline.setMap(map);//跟新折线实例
+          }
+        }else if (lnglat[0] === '1'){
+          this.$store.commit("signMethod",1);
+          this.$store.commit("canSign",0);
+          this.icon = new AMap.Icon({
+            image: waterIcon,
+            imageSize: new AMap.Size(18, 18),
+          });
+          lnglat = this.parseData(lnglat);
+          for (var i=0;i<lnglat.length;i++){
+            marker = new AMap.Marker({
+              icon: this.icon,
+              map: map,
+              offset:new AMap.Pixel(-10, -10),
+              position: lnglat[i],
+              draggable: false,
+              bubble: true,
+              extData: 1,
+            });
+            this.markersWater.push(marker);//路径点压入markers实例数组
+            waterPath.push(lnglat[i]);//坐标压入路径数组
+            waterline.setPath(waterPath);//设置路径线的路径
+            waterline.setMap(map);//跟新折线实例
+          }
+        }else if (lnglat[0] === '2') {
+          this.$store.commit("signMethod",3);
+          this.$store.commit("canSign",0);
+          this.icon = new AMap.Icon({
+            image: areaRoadIcon,
+            imageSize: new AMap.Size(18, 18),
+          });
+          lnglat = this.parseData(lnglat);
+          lnglat = lnglat.reverse();
+          for (var i=0;i<lnglat.length;i++){
+            marker = new AMap.Marker({
+              icon: this.icon,
+              map: map,
+              offset:new AMap.Pixel(-10, -10),
+              position: lnglat[i],
+              draggable: false,
+              bubble: true,
+              extData: 1,
+            });
+            this.markersClean.push(marker);//路径点压入markers实例数组
+            cleanPath.push(lnglat[i]);//坐标压入路径数组
+            cleanline.setPath(cleanPath);//设置路径线的路径
+            cleanline.setMap(map);//跟新折线实例
+          }
+        }
+
       }
     },
     computed: {
       pointType() {
-        return this.msg.pointType
+        return this.$store.getters.signMethod
       },
       isdel() {
-        return this.msg.isdel
+        return this.$store.getters.canDelete
       },
       ship(){
         return this.msg.ship
@@ -756,14 +860,16 @@
         }
       },
       shipAngle(){
-        return this.msg.shipAngle
+        return this.$store.getters.curr_yaw
+      },
+      shipState(){
+        return this.$store.getters.curr_state
       },
       startTask(){
-        console.log('开始任务赋值')
-        return this.msg.startTask
+        return this.$store.getters.startTask
       },
       canSign(){
-        return this.msg.canSign;
+        return this.$store.getters.canSign;
       },
     },
     watch: {
@@ -776,7 +882,7 @@
           this.initIcon();
         }
         if (oldType === 1) {
-          map.remove(polyline);
+          map.remove(waterline);
           map.remove(this.markersWater);
           this.markersWater.length = 0;
           waterPath.length = 0;
@@ -845,8 +951,8 @@
             this.markersWater[this.markersWater.length - 1].setMap(null);
             this.markersWater.pop();
             waterPath.pop();
-            polyline.setPath(waterPath);
-            polyline.setMap(map);
+            waterline.setPath(waterPath);
+            waterline.setMap(map);
           } else if (this.pointType === 2) {
             if (this.markersAraeline.length === 0 && this.markersArae.length === 0) return;
             if (this.areaSign === 1) {
@@ -878,7 +984,7 @@
           }
         } else if (newIs % 2 === 0) {  //等于0全部删除
           if (this.pointType === 1) {
-            map.remove(polyline);
+            map.remove(waterline);
             map.remove(this.markersWater);
             this.markersWater.length = 0;
             waterPath.length = 0;
@@ -922,6 +1028,18 @@
       shipChooseId(newId,oldId){
         var lnglat = new AMap.LngLat(this.ship[newId][0],this.ship[newId][1]);
         map.setCenter(lnglat);
+        var icon = new AMap.Icon({
+          image: shipIcon2,
+          imageSize: new AMap.Size(25, 25),
+        });
+        this.markersShip[newId].setIcon(icon);
+        if (oldId !== -1){
+          var icon = new AMap.Icon({
+            image: shipIcon,
+            imageSize: new AMap.Size(25, 25),
+          });
+          this.markersShip[oldId].setIcon(icon);
+        }
         if (this.pointType === -1){
           return
         }else if (this.pointType === 0){
@@ -930,7 +1048,7 @@
           this.markers.length = 0;
           path.length = 0;
         }else if (this.pointType === 1){
-          map.remove(polyline);
+          map.remove(waterline);
           map.remove(this.markersWater);
           this.markersWater.length = 0;
           waterPath.length = 0;
@@ -956,10 +1074,20 @@
             map.on('click', this.addMarker)
           }
         }
+        if(this.$store.getters.activeTask[newId]){
+          var activeTask = this.$store.getters.activeTask[newId];
+          this.loadActiveTask(activeTask);
+        }
+      },
+      //监听船状态
+      shipState(newState,oldState){
+        console.log('船状态变化')
       },
       startTask(newTask,oldTask){
         console.log('开始任务');
         this.constructorData(newTask[0]);
+        this.$store.commit('activeTask',this.activeTaskList);
+        console.log(this.$store.getters.activeTask);
       },
       canSign(newSign,oldSign){
         if (newSign === 0){

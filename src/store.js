@@ -13,9 +13,10 @@ const state = {
   canDelete:0,
   shipChooseId:-1,//当前船的id
   startTask:[0,0],  //第一位类型，第二位是状态位
-  root:[],
-  area:[],
-  curr_state:[0,0,0],
+  activeTask:[],//活动任务列表
+  root:[],//开始任务时路径
+  area:[],//区域路径
+  curr_state:[0,1,0],
   curr_lat:[],
   curr_lng:[],
   curr_yaw:[],
@@ -82,7 +83,9 @@ export default new Vuex.Store({
     curr_speed:state => {
       return state.rame_time;
     },
-
+    activeTask: state => {
+      return state.activeTask; // 让外界能获取 show
+    },
   },
   mutations: {
     cruiseShow (state, value) { // 让外界能改变 show
@@ -215,7 +218,13 @@ export default new Vuex.Store({
         state.curr_speed = !state.curr_speed;
       }
     },
-
+    activeTask(state,value){
+      if(value !== undefined){
+        state.activeTask = value;
+      }else{
+        state.activeTask = !state.activeTask;
+      }
+    },
 
   },
   actions: { // 让外界能通过异步调用的方式 改变 show
@@ -272,6 +281,9 @@ export default new Vuex.Store({
     },
     curr_speed ({commit}) {
       commit('curr_speed');
+    },
+    activeTask ({commit}) {
+      commit('activeTask');
     },
 
 

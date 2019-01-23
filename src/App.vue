@@ -130,7 +130,7 @@
         shipList:[{name:'浐灞121231231' ,value:0},{name:'兴庆3dsvsvwdvds',value:1}],
         ship:['浐灞'],
         show:false,
-       // present:0,
+        present:0,
         temp:0,
 
       }
@@ -139,6 +139,13 @@
       this.created();
     },
     methods: {
+      headerTop(){
+        if(this.$store.getters.shipChooseId===-1){
+          return '请选择船';
+        }else{
+          return this.shipList[this.$store.getters.shipChooseId].name;
+        }
+      },
 
       onCancel () {
         console.log('on cancel')
@@ -148,7 +155,7 @@
         if (msg) {
           alert(msg);
         }
-       // this.present = this.temp.value;  //把刚才临时保存的值给当前的值
+        this.present = this.temp.value;  //把刚才临时保存的值给当前的值
         this.$store.commit('shipChooseId',this.temp.value);
         this.headerTop = this.temp.name;
        // 确定要切换船，就要切换

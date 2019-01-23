@@ -93,7 +93,7 @@
   //one 代码巡航功能，two代表水质功能 ，three清洁功能
 
   let onegroup0 = [sign, deleteOne, clear, cricle,backMethod,startTask];//刚上电状态
-  let onegroup1 = [startTask, stopTask, startBack];//任务进行中
+  let onegroup1 = [startTask, stopTask, backMethod,startBack];//任务进行中
   let onegroupfu11 = [];    //关机状态无功能，但是如果是空的的话会难看
   let onegroupfu10 = [];//待机状态暂时不考虑
   let onegroupfu4 = [reStartBack,endBack];
@@ -103,7 +103,7 @@
 
 
   let twogroup0 = [sign, deleteOne, clear, cricle , detectionTime,backMethod,startTask];//刚上电状态
-  let twogroup1 = [startTask, stopTask, startBack,backMethod];//任务进行中
+  let twogroup1 = [startTask, stopTask, backMethod,startBack];//任务进行中
   let twogroupfu11 = [];    //关机状态无功能，但是如果是空的的话会难看
   let twogroupfu10 = [];//待机状态暂时不考虑
   let twogroupfu4 = [reStartBack,endBack,endTask];
@@ -111,13 +111,13 @@
   let twogroupfu2 = [stopBack,endBack,endTask];//返航中
   let twogroupfu1 = [reStartTask,startBack,endTask,backMethod];
   //需要确定清理方式目前是怎么定的
-  let threegroup0 = [sign,deleteOne, clear, cricle ,startTask];//刚上电状态,backMethod
-  let threegroup1 = [startTask, stopTask, startBack,backMethod];//任务进行中
+  let threegroup0 = [sign,deleteOne, clear,cricle,backMethod,startTask];//刚上电状态,backMethod
+  let threegroup1 = [startTask, stopTask, backMethod,startBack];//任务进行中
   let threegroupfu11 = [];    //关机状态无功能，但是如果是空的的话会难看
   let threegroupfu10 = [];//待机状态暂时不考虑
   let threegroupfu4 = [reStartBack,endBack,endTask];
   let threegroupfu3 = [];     //任务结束，要让用户选择是否保存。
-  let threegroupfu2 = [stopBack,endBack,endTask];//返航中
+  let threegroupfu2 = [stopBack,endBack];//返航中
   let threegroupfu1 = [reStartTask,startBack,endTask,backMethod];
 
   let times = [[{name:'5秒',value:5},{name:'6秒',value:6},{name:'7秒',value:7},
