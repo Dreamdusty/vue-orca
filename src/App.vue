@@ -89,7 +89,17 @@
         <p style="text-align:center;">Are you sure?</p>
       </confirm>
     </div>
+    <div v-transfer-dom>
+      <confirm v-model="showEnd"
+               :title="'船执行任务已完成，是否再来一圈？'"
+               @on-cancel="anotherCricle"
+               @on-confirm="onConfirmEnd">
+        <!--<p style="text-align:center;">是否再来一圈</p>-->
+      </confirm>
+    </div>
   </div>
+
+
 
 
 </template>
@@ -98,6 +108,7 @@
   import { ViewBox, XHeader, Confirm,Tabbar, TabbarItem, Group, Cell, ButtonTab, ButtonTabItem ,Popover,Checklist,TransferDom,XButton} from 'vux'
   import Drawer from '@/components/drawer.vue'
   import { getCookie } from './utils/cookie'
+  import {changeShip} from "./utils/socket";
 
   export default {
     name: 'App',
@@ -125,27 +136,43 @@
         path: '',
         items: [],
         paths: [],
-        cookie: false,
-        headerTop:'请选择船',
-        shipList:[{name:'浐灞121231231' ,value:0},{name:'兴庆3dsvsvwdvds',value:1}],
+        ///headerTop:'请选择船',
+        shipList:[{name:'浐灞121231231' ,value:0},{name:'兴庆3dsvsvwdvds',value:1},{name:'浐灞1' ,value:2}],
         ship:['浐灞'],
         show:false,
-        present:0,
+        //present:0,
         temp:0,
+        showEnd:false,
+        finishTaskShip:this.$store.getters.finishTaskShip,
 
       }
     },
     mounted() {
       this.created();
     },
-    methods: {
-      headerTop(){
-        if(this.$store.getters.shipChooseId===-1){
-          return '请选择船';
-        }else{
-          return this.shipList[this.$store.getters.shipChooseId].name;
-        }
+    computed:{
+      present:function(){
+        return this.$store.getters.shipChooseId;
       },
+      headerTop:{
+        get(){
+          if(this.present===-1){
+            return '请选择船';
+          }else{
+            // console.log("改变名字");
+            return this.shipList[this.present].name;
+          }
+        },
+        set(){
+
+        }
+
+      },
+      cookie: function () {
+        return this.$store.getters.cookie;
+      }
+    },
+    methods: {
 
       onCancel () {
         console.log('on cancel')
@@ -155,11 +182,18 @@
         if (msg) {
           alert(msg);
         }
-        this.present = this.temp.value;  //把刚才临时保存的值给当前的值
+      //  this.present = this.temp.value;  //把刚才临时保存的值给当前的值
         this.$store.commit('shipChooseId',this.temp.value);
         this.headerTop = this.temp.name;
        // 确定要切换船，就要切换
 
+      },
+      anotherCricle(){//再来一圈
+
+
+      },
+      onConfirmEnd(){
+        //this.showEnd = true;
       },
       confirmShow(ship){
         this.show = true;
@@ -216,10 +250,25 @@
         // this.drawerShow = false; // 路由跳转、关闭侧边栏
 
         if (getCookie("AppCookieToken")) {
-          this.cookie = true;
+          this.$store.commit('cookie', true);
+          this.$router.push({
+            path: '/home',
+          });
         }
         this.drawerShow = false; // 路由跳转、关闭侧边栏
+      },
+      present(newvalue,oldvalue){
+        changeShip(newvalue);
+       // console.log("换船了"+previous+oldvalue);
+      },
+
+      finishTaskShip(newval) {
+        if (newval != -1) {
+          this.showEnd = true;
+        }
       }
+
+
     },
     directives: {
       TransferDom

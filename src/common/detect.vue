@@ -2,19 +2,22 @@
   <div class="detect-popup">
     <popup
       v-model="showPopup"
-      height="217px"
+      v-bind:height="size"
       :is-transparent="true"
       :hide-on-blur="false"
       :show-mask="false">
       <div class="detect-show">
-        <icon v-bind:status="status" v-bind:type="'2'" ></icon>
+        <icon v-bind:status="status" v-bind:type="'2'" v-bind:id="id"  v-on:changeHeight="changeHeight"></icon>
       </div>
     </popup>
+    <div v-transfer-dom>
+      <alert v-model="show" :title="error[code]">{{tip[code]}}</alert>
+    </div>
   </div>
 </template>
 
 <script>
-  import { Popup, XButton, Grid, GridItem } from 'vux'
+  import { Popup, XButton, Grid, GridItem,Alert,TransferDom } from 'vux'
   import Icon from '../components/icon.vue'
   export default {
     name: "detect",
@@ -24,26 +27,46 @@
       Grid,
       GridItem,
       Icon,
+      Alert
     },
     methods: {
       onTabbarIndex() {
         console.log('点击');
       },
+      changeHeight(data){
+        this.size = data+"px";
+      }
     },
     computed: {
       status(){
-        //return this.$store.getters.curr_state[this.id]+"";
-        return "0";
+        return this.$store.getters.curr_state[this.id]+"";
+        //return "0";
       },
       showPopup: {
         get() {
           return this.$store.getters.detectShow
         },
         set(value) {
-          if (this.$store.getters.cruiseShow || this.$store.getters.cleanShow) {
-            if (value) {
-              this.$store.commit('cruiseShow', false);
-              this.$store.commit('cleanShow', false);
+
+          if(this.id+""==="-1"){
+            this.code = 0;
+            this.show = true;
+          }else if(this.status+''==="-11"){//船没上电
+            this.code = 1;
+            this.show = true;
+          }else if(this.status>0){
+            if(this.$store.getters.cruiseShow || this.$store.getters.cleanShow){//说明是从别的地方切换过来的
+              this.$store.commit('detectShow', false);
+              this.code = 2;
+              this.show = true;
+              console.log("就运行的这里");
+            }
+          }else{
+            if (this.$store.getters.cruiseShow || this.$store.getters.cleanShow) {
+              if (value) {
+                this.$store.commit('cruiseShow', false);
+                this.$store.commit('cleanShow', false);
+              }
             }
           }
         },
@@ -52,8 +75,15 @@
     props:['id'],
     data () {
       return {
-
+        code:-1,
+        show:false,
+        size:'130px',
+        error:["暂未选船","船尚未上电","船正在运行"],
+        tip:["请先选择船","请先开tip船","请勿切换到别的任务"],
       };
+    },
+    directives: {
+      TransferDom
     },
   }
 </script>

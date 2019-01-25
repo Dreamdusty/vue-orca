@@ -2,15 +2,22 @@
   <div class="amap">
     <div id="amap-main" ></div>
     <!--<p>这里其实根据船的数目有多个</p>-->
-    <Ocmap v-bind:msg="msg" ></Ocmap>
-    <div v-for="n in count">
-      <div v-model="m">
-        <p>1111n</p>
-        <cruise v-bind:id="n"></cruise>
-        <clean v-bind:id="n"></clean>
-        <detect v-bind:id="n"></detect>
+    <Ocmap  ></Ocmap>
+    <div v-for="ship in chuans">
+      <div v-if="ship.value">
+        <cruise v-bind:id="ship.id"></cruise>
+        <clean v-bind:id="ship.id"></clean>
+        <detect v-bind:id="ship.id"></detect>
       </div>
     </div>
+    <div v-if="show">
+      <cruise v-bind:id="-1"></cruise>
+      <clean v-bind:id="-1"></clean>
+      <detect v-bind:id="-1"></detect>
+    </div>
+
+
+<!--    <p>当任务结束的时候弹出询问框，暂时先不管是否再来一圈？？</p>-->
   </div>
 </template>
 
@@ -34,31 +41,23 @@
       return {
         // getCookie("totalShip")
         count:4,
-        present:1,  //this.$store.getters.shipChooseId,
-        m:false,
-       /* chuans: [
-          true, false, false, false, false, false, false, false],
-*/
+        present:this.$store.getters.shipChooseId,
+
       }
     },
     computed: {
-      msg(){//船的数目
-          return {
-            id: this.present,
-            ship: [[108.89662,34.247559], [108.898846, 34.247005],[108.896368,34.248526]],//所有船坐标
-            shipRoad: [],//所有船走的所有路径点
-          }
-       },
+      show(){
+        return this.$store.getters.shipChooseId===-1;//用于未上电状态的提醒。
+      },
       chuans(){
         let temp =[];
-        let object = false;
+        let object;
         for(let i=0;i<this.count;i++){
-          object = false;
+          object ={id:i,value:false};
           if(i===this.$store.getters.shipChooseId) {
-            object = true;
+            object = {id:i,value:true};
           }
           temp.push(object);
-
         }
         console.log(temp);
         return temp;
@@ -66,25 +65,24 @@
 
 
     },
-    watch: {
-      present: function (data) {//观察到当前船变化就改变当前船
-        let temp = this.chuans;
-        this.chuans.forEach(function (val, index, temp) {
-          if (index < this.count) {
-            temp[index] = false;
-          }
-        });
-        temp[data - 1] = true;
-        this.chuans = temp;
-      },
-    },
     methods: {
 
-      mounted() {
+      onCancel () {
+        console.log('on cancel')
+      },
+      onConfirm (msg) {//确定再来一圈？
+        console.log('on confirm')
+        if (msg) {
+          alert(msg);
+        }
+        //  this.present = this.temp.value;  //把刚才临时保存的值给当前的值
+        this.$store.commit('shipChooseId',this.temp.value);
+        this.headerTop = this.temp.name;
+        // 确定要切换船，就要切换
 
       },
-
     },
+
     components: {
       Cruise,
       Clean,

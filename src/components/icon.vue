@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="icon-grid">
-      <grid :show-lr-borders="false" :cols="3" >
+      <grid :show-lr-borders="false" :cols="4" >
         <div v-for="icon in icons">
           <grid-item @on-item-click="Handler(icon.name)">
             <img slot="icon" v-bind:src="icon.src" alt="">
@@ -56,12 +56,34 @@
              :is-transparent="false"
              :show-mask="false">
         <div class="popup">
-          <group-title>这是什么</group-title>
+
+          <group-title>请选择检测时间，系统默认值为5秒</group-title>
           <picker :data='timelist' v-model='time'></picker>
           <x-button type="primary" @click.native="setTimeChange" style="width:100px;margin-top:30px" >确定</x-button>
         </div>
       </popup>
     </div>
+
+    <div v-transfer-dom>
+      <popup v-model="cleanShow" position="bottom" height="50%"  @on-hide="closeCleanShow"
+             :is-transparent="false"
+             :show-mask="false"
+             :hide-on-blur="true">
+        <div class="popup">
+          <checklist :title="'请选择返航方式,系统默认为 标准'" :options="cleanlist" v-model="cleanItem" :max="1"></checklist>
+          <x-button type="primary" @click.native="setCleanChange" style="width:100px;margin-top:30px" >确定</x-button>
+        </div>
+      </popup>
+    </div>
+
+    <div v-transfer-dom>
+      <alert v-model="showError" :title="errorTitle[errorCode]">{{errorTip[errorCode]}}</alert>
+    </div>
+
+    <toast v-model="showToast" text="任务正在开启中"></toast>
+    <toast v-model="startError" text="出现错误"></toast>
+    <toast v-model="showSuccessful" text="设置成功"></toast>
+
 
 
 
@@ -71,7 +93,8 @@
 </template>
 
 <script>
-  import { TabbarItem,TransferDom,Popup,InlineXNumber,XButton,Grid,GridItem,Selector,Group,Popover,Checklist,Picker,GroupTitle} from 'vux'
+  import { TabbarItem,TransferDom,Popup,InlineXNumber,XButton,Grid,GridItem,Selector,Group,Popover,Checklist,Picker,GroupTitle,Alert,Toast} from 'vux'
+  import {sendAreaPoint,start,end,recover,stop,back,getReceive,setReceive,getClean,setClean} from "../utils/socket";
   import { addRoute } from "../api/api";
   // let 可以改变值， const 不可改变值
   let sign= {name:'标点', src:'../static/image/logo.png', func: this.fsign};
@@ -89,11 +112,14 @@
   let stopBack = {name:"暂停返航",src:"../static/image/logo.png",func:this.fstopBack};
   let reStartBack = {name:"继续返航",src:".../static/image/logo.png",func:this.freStartBack};
   let detectionTime = {name:"检测时间",src:"../static/image/logo.png",func:this.fdetectionTime};
+  let saveRoute = {name:"保存路线",src:"../static/image/logo.png"};//
+  let cleanliness = {name:"清洁程度",src:"../static/image/logo.png"};//清洁程度
+  //让保存路线在开始任务之后，
 
   //one 代码巡航功能，two代表水质功能 ，three清洁功能
 
   let onegroup0 = [sign, deleteOne, clear, cricle,backMethod,startTask];//刚上电状态
-  let onegroup1 = [startTask, stopTask, backMethod,startBack];//任务进行中
+  let onegroup1 = [stopTask,endTask, backMethod,startBack];//任务进行中
   let onegroupfu11 = [];    //关机状态无功能，但是如果是空的的话会难看
   let onegroupfu10 = [];//待机状态暂时不考虑
   let onegroupfu4 = [reStartBack,endBack];
@@ -102,23 +128,26 @@
   let onegroupfu1 = [reStartTask,startBack,endTask];
 
 
-  let twogroup0 = [sign, deleteOne, clear, cricle , detectionTime,backMethod,startTask];//刚上电状态
-  let twogroup1 = [startTask, stopTask, backMethod,startBack];//任务进行中
+  let twogroup0 = [sign, deleteOne, clear, detectionTime,backMethod,startTask];//刚上电状态
+  let twogroup1 = [ stopTask,endTask, backMethod,startBack];//任务进行中
   let twogroupfu11 = [];    //关机状态无功能，但是如果是空的的话会难看
   let twogroupfu10 = [];//待机状态暂时不考虑
-  let twogroupfu4 = [reStartBack,endBack,endTask];
-  let twogroupfu3 = [];     //任务结束，要让用户选择是否保存。
-  let twogroupfu2 = [stopBack,endBack,endTask];//返航中
-  let twogroupfu1 = [reStartTask,startBack,endTask,backMethod];
+  let twogroupfu4 = [reStartBack,endBack,endTask]; //任务结束
+  let twogroupfu3 = [];     //任务结束，要让用户选择是否保存。     //没有
+  let twogroupfu2 = [stopBack,endBack,endTask];//返航中       //任务暂停
+  let twogroupfu1 = [reStartTask,startBack,endTask,backMethod];    //没有
   //需要确定清理方式目前是怎么定的
-  let threegroup0 = [sign,deleteOne, clear,cricle,backMethod,startTask];//刚上电状态,backMethod
-  let threegroup1 = [startTask, stopTask, backMethod,startBack];//任务进行中
+  let threegroup0 = [sign,deleteOne, clear,backMethod,startTask,cleanliness,saveRoute];//刚上电状态,backMethod
+  let threegroup1 = [stopTask,endTask,  backMethod,startBack];//任务进行中
   let threegroupfu11 = [];    //关机状态无功能，但是如果是空的的话会难看
-  let threegroupfu10 = [];//待机状态暂时不考虑
+  let threegroupfu10 = [];    //待机状态暂时不考虑
   let threegroupfu4 = [reStartBack,endBack,endTask];
   let threegroupfu3 = [];     //任务结束，要让用户选择是否保存。
   let threegroupfu2 = [stopBack,endBack];//返航中
   let threegroupfu1 = [reStartTask,startBack,endTask,backMethod];
+
+
+  //-5是返航
 
   let times = [[{name:'5秒',value:5},{name:'6秒',value:6},{name:'7秒',value:7},
     {name:'8秒',value:8},{name:'9秒',value:9},{name:'10秒',value:10},
@@ -161,8 +190,14 @@
       //检测时间
         timelist:times,
         timeSelect:false,
-        time :['5'],
-        timeToFather:'5',
+        time :[5],
+        timeToFather:5,
+        //清洁程度
+        cleanShow:false,
+        cleanlist:["快速","标准","极净"],
+        cleanItem:['标准'],
+        cleanTofather:5,
+
 
 
         deleteOne:false,//如何告诉对方要撤销一个点？
@@ -170,14 +205,35 @@
 
         startTask:0,
 
+        saveRoute:0,
+
+        height:130,   //高度用来做自适应，让外面知道应该给多高的popup
+
+        showToast:false,
+        showSuccessful:false,
+        startError:false,
+       // toastCode:-1,
+       // toastTip:["任务开启","设置成功"],
+        showError:false,
+        errorCode:-1,
+        errorTitle:["未标路径点","区域未闭合"],
+        errorTip:["请标路径点","请点击第一个点使得区域闭合"],
+
       }
     },
     computed:{
+      area(){
+        return this.$store.getters.area;
+
+      },
+      route(){
+        return this.$store.getters.root;
+      },
+     // saveRoute(){
+     //   return this.$store.getters.saveRoute;
+    //  },
       icons(){
-        console.log("张涵想要的数据："+this.status);
-       /* if(this.realStatus>0){
-          this.realStatus='1';
-        }*/
+      //  console.log("张涵想要的数据："+this.status);
         if(this.type+""==="3")
         {
           this.type = "3";
@@ -186,6 +242,7 @@
           switch(this.status){
             case '0':
               console.log("eeeee");
+              this.height = 210;
               return threegroup0;
             case '-11':
               return threegroupfu11;
@@ -210,9 +267,10 @@
         }
         else if(this.type+""==="2"){
           this.type = "2";
-          console.log("此时的状态"+this.type);
+        //  console.log("此时的状态"+this.type);
           switch(this.status){
             case '0':
+              this.height = 210;
               return twogroup0;
             case '-11':
               return twogroupfu11;
@@ -237,9 +295,10 @@
 
         }else if(this.type+""==="1"){
           this.type = "1";
-          console.log("此时的状态"+this.type);
+         // console.log("此时的状态"+this.type);
           switch(this.status){
             case '0':
+              this.height = 210;
               return onegroup0;
             case '-11':
               return onegroupfu11;
@@ -262,6 +321,12 @@
             return onegroup1;
           }
         }
+        if(this.status+""!=="0"){
+          this.height = 130;
+        }
+
+
+
       },
 
     },
@@ -279,6 +344,15 @@
           }
           this.$store.commit('canSign',this.canSign);
           this.$store.commit('signMethod',this.signMethodToFather);
+          //使得标点的时候弹框下去
+          // if(this.$store.getters.detectShow){
+          //   this.$store.commit('detectShow', false);
+          // }else if(this.$store.getters.cleanShow) {
+          //   this.$store.commit('cleanShow', false);
+          // }else if(this.$store.getters.cruiseShow){
+          //   this.$store.commit('cruiseShow', false);
+          // }
+
         }
       },
       fdeleteOne() {
@@ -296,7 +370,7 @@
         this.canSign = 0;
         this.$store.commit('canSign',0);  //不准标点了
         if (this.$store.getters.cruiseShow || this.$store.getters.detectShow|| this.$store.getters.cleanShow) {
-            console.log("关闭其它");
+            //console.log("关闭其它");
             this.$store.commit('cruiseShow', false);
             this.$store.commit('detectShow', false);
             this.$store.commit('cleanShow', false);
@@ -307,24 +381,22 @@
       fstartTask() {
         this.canSign = 0;
         this.$store.commit('canSign',0);  //不准标点了
-       // this.signMethodToFather= -1;
-      //  this.$store.commit('signMethod',-1);  //不准标点了
-       // let route=this.$store.getters.route;
         this.startTask =(this.startTask +1)%10;
         let temp =[parseInt(this.type),this.startTask];
-       this.$store.commit("startTask",temp);
+        this.$store.commit("startTask",temp);
+      /* var name = this.$store.getters.curr_state;
+        name.splice(1,1,1);
+      // name[1] = 0;
+       this.$store.commit('curr_state',name);*/
       },
       fendTask() {
-
+        end();
       },
       fstopTask() {
-
+        stop();
       },
-      /**
-       *
-       */
       freStartTask() {
-
+        recover();
       },
       fbackmethod() {
         this.canSign = 0;
@@ -333,16 +405,16 @@
 
       },
       fstartBack() {
-
+        back();
       },
       fendBack() {
-
+        end();
       },
       fstopBack() {
-
+        stop();
       },
       freStartBack() {
-
+        recover();
       },
       fdetectionTime() {
         this.timeSelect = true;
@@ -350,9 +422,20 @@
         this.$store.commit('canSign',0);  //不准标点了
 
       },
+      fsaveRoute(){
+        //this.canSign = 0;
+       // this.$store.commit('canSign',0);  //不准标点了
+        console.log("save");
+        this.saveRoute =(this.saveRoute +1)%10;
+        let temp =[parseInt(this.type),this.saveRoute];
+        this.$store.commit("saveRoute",temp);
+      },
+      fcleanliness(){
+        this.cleanShow = true;
+      },
       onTabbarIndex: function (title) {
-        console.log(title);
-        console.log('aaaaaaaaaaaaaaa');
+     //   console.log(title);
+    //    console.log('aaaaaaaaaaaaaaa');
       },
        Handler(name){
          let operation = (name+"");
@@ -385,20 +468,26 @@
            this.freStartBack();
          } else if(operation==="检测时间"){
            this.fdetectionTime();
+         } else if(operation==='保存路线'){
+           this.fsaveRoute();
+         }else if(operation==='清洁程度'){
+           this.fcleanliness();
          }
+
 
        },
        SendCricleNum(){
 
          this.closeCricleShow();
          this.cricleNumToFather = this.cricleNum;
+         this.showSuccessful = true;
 
        },
        closeCricleShow(){
          //one 代码巡航功能，two代表水质功能 ，three清洁功能
          this.cricleShow=false;
          if(this.type==="1"){
-           console.log("巡航");
+           //console.log("巡航");
            this.$store.commit('cruiseShow', true);
          }else if(this.type==="2"){
            console.log("水质");
@@ -417,6 +506,7 @@
         }
         this.$store.commit('canSign',this.canSign);
         this.$store.commit('signMethod', this.signMethodToFather);
+        //this.showSuccessful = true;
 
       },
       closesignMethodSelect(){
@@ -428,7 +518,8 @@
       setBackMethod(){
         this.backMethodSelect=false;
         this.backMethodToFather = this.backMethod[0];
-        console.log(this.backMethodToFather)
+        console.log(this.backMethodToFather);
+        this.showSuccessful = true;
       },
       closeTimeSelect(){
         this.timeSelect = false;
@@ -436,13 +527,166 @@
       setTimeChange() {
         this.timeToFather = this.time;
         this.timeSelect = false;
+        this.showSuccessful = true;
       },
+
+      closeCleanShow(){
+        this.cleanShow= false;
+      },
+      setCleanChange(){
+        if(this.cleanItem[0]==="快速"){
+          this.cleanTofather  = 7;
+        }else if(this.cleanItem[0]==="极净"){
+          this.cleanTofather = 3;
+        }
+        this.closeCleanShow();
+        this.showSuccessful = true;
+      //  console.log("清洁时间"+this.cleanTofather);
+      },
+
+
+      handleRoute(route){
+        let fanRoute ="";
+        let resultRoute = "";
+        let split = route.split(";");
+        for(var i=split.length-2;i>0;i--){//减掉两个东西  1->2->3->4->3->2  偶数的时候还要存一下第一个点  ，奇数的时候没啥说的
+          fanRoute +=split[i]+";";
+        }
+        for(var i=0;i<this.cricleNumToFather;i++){
+          if(i%2===0){
+            resultRoute +=route;
+          }else{
+            resultRoute +=fanRoute;
+          }
+        }
+        if(this.cricleNumToFather%2===0){
+          resultRoute+=split[0]+";";
+        }
+        resultRoute = resultRoute.substring(0, resultRoute.length - 1);
+        console.log(resultRoute);
+        return resultRoute;
+      }
     },
-    props:['status','type'],
+    props:['status','type','id'],
     watch:{
       status:function(val) {
       console.log("prop变化了没有"+val);
       },
+      height:function(newval){
+        this.$emit('changeHeight',newval);
+      },
+      area(newval,oldval){
+        if(this.$store.getters.shipChooseId+""===(this.id+"")){
+          if(this.type==='3'){//清洁功能
+            //console.log('清洁功能.............................'+this.type+"...."+this.id);
+
+            //console.log("///////////////"+this.route);
+            if(this.route+""===""){
+              this.showError=true;
+              this.errorCode=0;
+              console.log("路径不允许为空");
+            }else if(newval===""){//说明当区域不闭合的时候，这个里面为[]
+              this.showError=true;
+              this.errorCode=1;
+              console.log("区域不闭合");
+            }else{
+              sendAreaPoint(this.id,newval,this.cleanTofather);//将区域点进行处理，得到realroute。
+              let areatemp;
+             /* while(getReceive(this.id)===""||getReceive(this.id)===undefined){//等到这个东西不为空
+                console.log("陷在循环里面"+getReceive(this.id));
+              }*/
+              areatemp = getReceive(this.id);
+             // console.log("从庞长松那里拿到的数据"+areatemp);
+              console.log("距离"+getClean(this.id));
+             // let splitRoute = this.route.split(";");
+             // let splitareaTemp = this
+             // let start = split.length-2;
+              let object ={ship_id:3,route:this.route+newval,turns:this.cricleNumToFather,cleanliness:this.cleanliness,real_route:this.route+areatemp};
+              addRoute(object).then(res => {
+                console.log("res:====" + res.data.data);
+                if (res.data.code !== 200) {
+                  // this.$toast(res.data.message);
+                  this.startError=true;
+                  console.log("错误" + res.data.message);
+                } else {//正确
+                 let  id = res.data.data;
+                  console.log("id:" + res.data.data);
+                  start(id);//给船发指令
+                  this.showToast =true;//弹出提示框
+                }
+              });
+              this.$store.commit('root',"");
+              setReceive(this.id,"");
+              setClean(this.id,0);
+
+            }
+
+          }
+        }
+
+        //console.log('haaaaaa'+newval);
+
+      },
+      type(newval,oldval){
+        console.log("谁伤害了我的type：新值"+newval+",旧制"+oldval);
+      },
+      route(newval,oldval){
+       // console.log("我就看看这个类型到底是多少"+this.type);
+        //就是说还要判断如何
+       if (this.$store.getters.shipChooseId+""===(this.id+"")&&newval!==""&&this.$store.getters.cleanShow!==true){
+         if(this.type!=='3'){//当这个变量变化的时候还需要判断是不是这艘船在发生变化，
+          // console.log("///////////////////////////////////"+this.type+"////"+this.id);
+           let route = this.handleRoute(newval);//真实的路径let
+           let object;
+           let id;
+           //看看圈数的初始值
+           if(this.$store.getters.detectShow===true&&this.type==='2'){
+             //console.log("执行水质");
+             object = {ship_id:3,route:newval,turns:this.cricleNumToFather,water_time:this.timeToFather,real_route:route};
+             addRoute(object).then(res =>{
+               console.log("res:====" + res.data.data);
+               if (res.data.code !== 200) {
+                 // this.$toast(res.data.message);
+                 this.startError=true;
+                 console.log("错误"+res.data.message);
+               }else{//正确
+                 id = res.data.data;
+                 console.log("id:"+ res.data.data);
+                 start(id);//给船发指令
+                 this.showToast =true;
+
+               }
+             });
+             this.$store.commit('root',"");//将路径点置空
+           }else if(this.$store.getters.cruiseShow===true&&this.type==='1'){//说明是巡航点
+             //console.log("执行巡航");
+             object = {ship_id:3,route:newval,turns:this.cricleNumToFather,real_route:route};
+             addRoute(object).then(res => {
+               console.log("res:====" + res.data.data);
+               if (res.data.code !== 200) {
+                 // this.$toast(res.data.message);
+                 this.startError=true;
+                 console.log("错误" + res.data.message);
+               } else {//正确
+                 id = res.data.data;
+                 console.log("id:" + res.data.data);
+                 this.showToast =true;
+                 start(id);//给船发指令
+
+               }
+             });
+            // this.$store.commit('root',"");//将路径点置空
+           }
+           this.$store.commit('root',"");//将路径点置空
+          // console.log("这里执行了两次");
+
+
+         }
+       }
+
+      },
+
+
     },
     components: {
       Grid,
@@ -457,6 +701,8 @@
       Checklist,
       Picker,
       GroupTitle,
+      Alert,
+      Toast,
     },
     directives: {
       TransferDom

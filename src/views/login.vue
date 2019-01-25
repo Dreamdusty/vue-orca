@@ -93,7 +93,10 @@
             this.$store.commit('curr_battle',new Array(res.data.data.totalShip));
             this.$store.commit('curr_speed',new Array(res.data.data.totalShip));*/
 
+            setCookie('AppCookieToken', res.data.data.token);
+            this.$store.commit('cookie', true);
             this.$router.push('/home');
+
             setCookie('account',this.account);
             setCookie('shipId', res.data.data.shipId);
             setCookie('totalShip', res.data.data.totalShip);

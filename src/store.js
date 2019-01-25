@@ -8,18 +8,28 @@ const state = {
   cruiseShow: false,
   cleanShow: false,
   detectShow: false,
+  cookie: false,
   canSign:-1,
   signMethod:-1,
   canDelete:0,
   shipChooseId:-1,//当前船的id
   startTask:[0,0],  //第一位类型，第二位是状态位
-  activeTask:[],//活动任务列表
   root:[],//开始任务时路径
   area:[],//区域路径
-  curr_state:[0,1,0],
-  curr_lat:[],
-  curr_lng:[],
-  curr_yaw:[],
+  saveTaskRoot:'',
+  saveTaskarea:'',
+  activeTask:[],//zhoulei 活动中的任务 activeTask[0]为空表示船0没有任务 activeTask[0]='0;a,b;'船0有路径任务
+                // activeTask[0]='1;a,b;' 船0有水质任务 activeTask[0] = '2;a,b';船0有清洁任务
+  boundsAndObstacles:['b;108.896177,34.248721;108.896091,34.247133;108.89916,34.246229;108.899578,34.248118;',
+    'b;108.896177,34.248721;108.896091,34.247133;108.89916,34.246229;108.899578,34.248118;',
+    'o;108.898532,34.248046;108.899071,34.247755;108.898879,34.24747;108.89835,34.247589;108.898146,34.247936;',
+    'o;108.897353,34.247879;108.897351,34.247825;108.89729,34.247817;108.897289,34.247886;'],//边界障碍集合
+  saveRoute:[],
+  finishTaskShip:-1,//
+  curr_state:[0,0,0],
+  curr_lat:[34.247559,34.247005,34.248211],
+  curr_lng:[108.89662,108.898846,108.896261],
+  curr_yaw:[90,30,20],
   curr_percen:[],//当前电量的百分比
   rame_time:[],//剩余时间
   curr_battle:[],//当前电量
@@ -37,6 +47,9 @@ export default new Vuex.Store({
     },
     detectShow: state => {
       return state.detectShow;
+    },
+    cookie: state => {
+      return state.cookie;
     },
     canSign: state => {
       return state.canSign;
@@ -86,6 +99,21 @@ export default new Vuex.Store({
     activeTask: state => {
       return state.activeTask; // 让外界能获取 show
     },
+    boundsAndObstacles: state => {
+      return state.boundsAndObstacles;
+    },
+    saveTaskRoot: state => {
+      return state.saveTaskRoot;
+    },
+    saveTaskarea: state => {
+      return state.saveTaskarea;
+    },
+    saveRoute:state => {
+      return state.saveRoute;
+    },
+    finishTaskShip:state => {
+      return state.finishTaskShip;
+    },
   },
   mutations: {
     cruiseShow (state, value) { // 让外界能改变 show
@@ -107,6 +135,13 @@ export default new Vuex.Store({
         state.detectShow = value;
       } else {
         state.detectShow = !state.detectShow;
+      }
+    },
+    cookie (state, value) {
+      if (value !== undefined) {
+        state.cookie = value;
+      } else {
+        state.cookie = !state.cookie;
       }
     },
     canSign (state, value) {
@@ -225,6 +260,41 @@ export default new Vuex.Store({
         state.activeTask = !state.activeTask;
       }
     },
+    boundsAndObstacles(state,value){
+      if(value !== undefined){
+        state.boundsAndObstacles = value;
+      }else{
+        state.boundsAndObstacles = !state.boundsAndObstacles;
+      }
+    },
+    saveTaskRoot(state,value){
+      if(value !== undefined){
+        state.saveTaskRoot = value;
+      }else{
+        state.saveTaskRoot = !state.saveTaskRoot;
+      }
+    },
+    saveTaskarea(state,value){
+      if(value !== undefined){
+        state.saveTaskarea = value;
+      }else{
+        state.saveTaskarea = !state.saveTaskarea;
+      }
+    },
+    saveRoute(state,value){
+      if(value !== undefined){
+        state.saveRoute = value;
+      }else{
+        state.saveRoute = !state.saveRoute;
+      }
+    },
+    finishTaskShip(state,value){
+      if(value !== undefined){
+        state.finishTaskShip = value;
+      }else{
+        state.finishTaskShip = !state.finishTaskShip;
+      }
+    },
 
   },
   actions: { // 让外界能通过异步调用的方式 改变 show
@@ -236,6 +306,9 @@ export default new Vuex.Store({
     },
     detectShow ({commit}) {
       commit('detectShow');
+    },
+    cookie ({commit}) {
+      commit('cookie');
     },
     canSign ({commit}) {
       commit('canSign');
@@ -284,6 +357,21 @@ export default new Vuex.Store({
     },
     activeTask ({commit}) {
       commit('activeTask');
+    },
+    boundsAndObstacles ({commit}) {
+      commit('boundsAndObstacles');
+    },
+    saveTaskRoot ({commit}) {
+      commit('saveTaskRoot');
+    },
+    saveTaskarea ({commit}) {
+      commit('saveTaskarea');
+    },
+    saveRoute ({commit}) {
+      commit('saveRoute');
+    },
+    finishTaskShip ({commit}) {
+      commit('finishTaskShip');
     },
 
 
