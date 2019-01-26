@@ -17,7 +17,7 @@ module.exports = {
         pathRewrite: {
           // '^/api' 就等于写'http://localhost:6666'
           // "/api/login/account" 就等于写 "http://localhost:6666/login/account"
-          '^/api': '/'
+          '^/': '/'
         }
       }
     },
@@ -40,7 +40,7 @@ module.exports = {
     assetsRoot: path.resolve(__dirname, '../dist'),
     assetsSubDirectory: 'static',
     assetsPublicPath: './',
-    productionSourceMap: false,
+    productionSourceMap: true,
     // https://webpack.js.org/configuration/devtool/#production
     devtool: '#source-map',
     productionGzip: false,

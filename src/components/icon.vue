@@ -12,7 +12,7 @@
     </div>
 
     <div v-transfer-dom>
-      <popup v-model="cricleShow" position="bottom" height="30%"  @on-hide="closeCricleShow"
+      <popup v-model="cricleShow" position="bottom" height="50%"  @on-hide="closeCricleShow"
       :is-transparent="false"
       :show-mask="false">
         <div class="popup">
@@ -199,7 +199,7 @@
         cleanShow:false,
         cleanlist:["快速","标准","极净"],
         cleanItem:['标准'],
-        cleanTofather:5,
+        cleanTofather:2,
 
 
 
@@ -539,9 +539,9 @@
       },
       setCleanChange(){
         if(this.cleanItem[0]==="快速"){
-          this.cleanTofather  = 7;
+          this.cleanTofather  = 3;
         }else if(this.cleanItem[0]==="极净"){
-          this.cleanTofather = 3;
+          this.cleanTofather = 1;
         }
         this.closeCleanShow();
         this.showSuccessful = true;

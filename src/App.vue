@@ -1,14 +1,15 @@
 <template>
   <div id="app">
-    <router-view name="index" v-if="false"></router-view>
+    <router-view name="index" v-if="!cookie"></router-view>
     <drawer
-      :show="drawerShow"
-      :pos="pos"
-      :tran="tran"
-      @change-show="changeDrawerShow"
+      :show.sync="drawerShow"
+      :show-mode="tran"
+      :placement="pos"
       @on-hide="onHide"
       @on-show="onShow"
-      v-if="true">
+      v-if="cookie">
+      <!-- 不执行 -->
+      <!--@change-show="changeDrawerShow"-->
       <!-- v-if="path !== '/'" -->
       <!-- 菜单内容 -->
       <div slot="drawer" class="drawer">
@@ -108,8 +109,8 @@
 </template>
 
 <script>
-  import { ViewBox, XHeader, Confirm,Tabbar, TabbarItem, Group, Cell, ButtonTab, ButtonTabItem ,Popover,Checklist,TransferDom,XButton} from 'vux'
-  import Drawer from '@/components/drawer.vue'
+  import { Drawer, ViewBox, XHeader, Confirm,Tabbar, TabbarItem, Group, Cell, ButtonTab, ButtonTabItem ,Popover,Checklist,TransferDom,XButton} from 'vux'
+  // import Drawer from '@/components/drawer.vue'
   import { getCookie } from './utils/cookie'
   import {changeShip} from "./utils/socket";
   import store from './store'
@@ -230,10 +231,10 @@
       onHide() {
         console.log('hide');
       },
-      changeDrawerShow(status) {
-        this.drawerShow = status;
-        console.log('drawer was changed from components');
-      },
+      // changeDrawerShow(status) {
+      //   this.drawerShow = status;
+      //   console.log('drawer was changed from components');
+      // },
       onShow() {
         console.log('show');
       },

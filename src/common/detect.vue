@@ -130,6 +130,6 @@
   }
 
   .detect-show .weui-grid {
-    padding: 8.8px 10px;
+    padding: 13px 10px;
   }
 </style>
