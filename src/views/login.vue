@@ -25,11 +25,14 @@
       <XButton
         type="default"
         class="login"
+        style="border-radius: 99px"
+        :gradients="['#64bcd5', '#364a9b']"
         @click.native="handleLogin"
         :disabled="disabled"
         v-model="data"
-      >登录</XButton>
+      >开 始 使 用</XButton>
     </div>
+
   </div>
 </template>
 
@@ -44,7 +47,7 @@
       return {
         data: '',
         images: {
-          backgroundImage: "url(" + require("../../static/image/login.jpg") + ") ",
+          backgroundImage: "url(" + require("../../static/image/登陆界面/切图-02.png") + ") ",
           backgroundRepeat: "no-repeat",
           backgroundSize: "100%",
           width: "100%",
@@ -112,7 +115,7 @@
   }
 </script>
 
-<style scoped lang="less">
+<style lang="less">
   @toast-content-font-size: orangered;
 
   .group {
@@ -121,6 +124,10 @@
     width: 80%;
   }
   .login {
-    top: 10px;
+    top: 25px;
+  }
+  .group .weui-cells {
+    margin-top: 0.5em;
+    font-size: 15px;
   }
 </style>

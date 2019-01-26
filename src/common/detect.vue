@@ -19,6 +19,7 @@
 <script>
   import { Popup, XButton, Grid, GridItem,Alert,TransferDom } from 'vux'
   import Icon from '../components/icon.vue'
+  import store from '../store'
   export default {
     name: "detect",
     components: {
@@ -39,12 +40,12 @@
     },
     computed: {
       status(){
-        return this.$store.getters.curr_state[this.id]+"";
+        return store.getters.curr_state[this.id]+"";
         //return "0";
       },
       showPopup: {
         get() {
-          return this.$store.getters.detectShow
+          return store.getters.detectShow
         },
         set(value) {
 
@@ -55,17 +56,18 @@
             this.code = 1;
             this.show = true;
           }else if(this.status>0){
-            if(this.$store.getters.cruiseShow || this.$store.getters.cleanShow){//说明是从别的地方切换过来的
-              this.$store.commit('detectShow', false);
+            if(store.getters.cruiseShow || store.getters.cleanShow){//说明是从别的地方切换过来的
+              store.commit('detectShow', false);
               this.code = 2;
               this.show = true;
               console.log("就运行的这里");
             }
           }else{
-            if (this.$store.getters.cruiseShow || this.$store.getters.cleanShow) {
+            if (store.getters.cruiseShow || store.getters.cleanShow) {
               if (value) {
-                this.$store.commit('cruiseShow', false);
-                this.$store.commit('cleanShow', false);
+                store.commit('cruiseShow', false);
+                store.commit('cleanShow', false);
+                this.$store.commit('canSign', 0);
               }
             }
           }

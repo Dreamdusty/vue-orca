@@ -6,16 +6,16 @@ import { stringify } from "qs";
 // list?val=   val
 // 登录
 export const userLogin = (params) => {
-  return http.post('/api/mobile/login/account', params);
+  return http.post('api/mobile/login/account', params);
 };
 
 // bound
 export const selectBound = (params) => {
-  return http.get(`/api/mobile/bound/list?${stringify(params)}`);
+  return http.get(`api/mobile/bound/list?${stringify(params)}`);
 };
 
 export const addRoute = (params) => {
-  return http.post(`/api/mobile/route/insert`, params);
+  return http.post(`api/mobile/route/insert`, params);
 };
 
 

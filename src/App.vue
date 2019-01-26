@@ -64,15 +64,18 @@
         </div>
         <tabbar icon-class="vux-center" slot="bottom"> <!-- v-show="" -->
           <tabbar-item @click.native="cruiseShowToggle">
-            <img slot="icon" src="../static/image/logo.png" alt=""/>
+            <img slot="icon" src="../static/image/首页图标/自主巡航.png" alt=""/>
+            <img slot="icon-active" src="../static/image/首页图标/自主巡航选中.png" alt=""/>
             <span slot="label">自主巡航</span>
           </tabbar-item>
           <tabbar-item @on-item-click="cleanShowToggle">
-            <img slot="icon" src="../static/image/logo.png" alt=""/>
+            <img slot="icon" src="../static/image/首页图标/智能清洁.png" alt=""/>
+            <img slot="icon-active" src="../static/image/首页图标/智慧清洁选中.png" alt=""/>
             <span slot="label">智慧清洁</span>
           </tabbar-item>
           <tabbar-item @on-item-click="detectShowToggle">
-            <img slot="icon" src="../static/image/logo.png" alt=""/>
+            <img slot="icon" src="../static/image/首页图标/水质检测.png" alt=""/>
+            <img slot="icon-active" src="../static/image/首页图标/水质检测选中.png" alt=""/>
             <span slot="label">水质监测</span>
           </tabbar-item>
         </tabbar>
@@ -91,7 +94,7 @@
     </div>
     <div v-transfer-dom>
       <confirm v-model="showEnd"
-               :title="'船执行任务已完成，是否再来一圈？'"
+               :title="'id为'+savefinish+'船执行任务已完成，是否再来一圈？'"
                @on-cancel="anotherCricle"
                @on-confirm="onConfirmEnd">
         <!--<p style="text-align:center;">是否再来一圈</p>-->
@@ -109,6 +112,8 @@
   import Drawer from '@/components/drawer.vue'
   import { getCookie } from './utils/cookie'
   import {changeShip} from "./utils/socket";
+  import store from './store'
+  import {end}from './utils/socket'
 
   export default {
     name: 'App',
@@ -143,7 +148,7 @@
         //present:0,
         temp:0,
         showEnd:false,
-        finishTaskShip:this.$store.getters.finishTaskShip,
+        savefinish:-1,
 
       }
     },
@@ -152,7 +157,11 @@
     },
     computed:{
       present:function(){
-        return this.$store.getters.shipChooseId;
+        return store.getters.shipChooseId;
+      },
+
+      finishTofuthree:function(){
+        return store.getters.finishTofuthree;
       },
       headerTop:{
         get(){
@@ -169,7 +178,7 @@
 
       },
       cookie: function () {
-        return this.$store.getters.cookie;
+        return store.getters.cookie;
       }
     },
     methods: {
@@ -183,16 +192,18 @@
           alert(msg);
         }
       //  this.present = this.temp.value;  //把刚才临时保存的值给当前的值
-        this.$store.commit('shipChooseId',this.temp.value);
+        store.commit('shipChooseId',this.temp.value);
         this.headerTop = this.temp.name;
        // 确定要切换船，就要切换
 
       },
       anotherCricle(){//再来一圈
-
+        end();
 
       },
       onConfirmEnd(){
+        console.log("结束");
+        end();
         //this.showEnd = true;
       },
       confirmShow(ship){
@@ -206,15 +217,15 @@
       },
       cruiseShowToggle() {
         // console.log('111');
-        this.$store.dispatch('cruiseShow').then();
+        store.dispatch('cruiseShow').then();
       },
       cleanShowToggle() {
         // console.log('111');
-        this.$store.dispatch('cleanShow').then();
+        store.dispatch('cleanShow').then();
       },
       detectShowToggle() {
         // console.log('111');
-        this.$store.dispatch('detectShow').then();
+        store.dispatch('detectShow').then();
       },
       onHide() {
         console.log('hide');
@@ -250,7 +261,7 @@
         // this.drawerShow = false; // 路由跳转、关闭侧边栏
 
         if (getCookie("AppCookieToken")) {
-          this.$store.commit('cookie', true);
+          store.commit('cookie', true);
           this.$router.push({
             path: '/home',
           });
@@ -262,10 +273,13 @@
        // console.log("换船了"+previous+oldvalue);
       },
 
-      finishTaskShip(newval) {
-        if (newval != -1) {
+      finishTofuthree(newval) {
+        console.log('状态变为-3');
+        if (newval !== -1) {
+          this.savefinish = newval;
           this.showEnd = true;
         }
+        this.$store.commit('finishTofuthree',-1);
       }
 
 

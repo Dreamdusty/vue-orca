@@ -1,6 +1,5 @@
 <template>
   <div class="clean-popup">
-
     <popup
       v-model="showPopup"
       v-bind:height="size"
@@ -8,7 +7,7 @@
       :hide-on-blur="false"
       :show-mask="false">
       <div class="clean-show">
-        <icon v-bind:status="status" v-bind:type="'3'" v-bind:id="id"  v-on:changeHeight="changeHeight"></icon>
+        <icon v-bind:status="status" v-bind:type="'3'" v-bind:id="this.id"  v-on:changeHeight="changeHeight"></icon>
       </div>
     </popup>
     <div v-transfer-dom>
@@ -20,6 +19,7 @@
 <script>
   import { Popup, XButton, Grid, GridItem ,Alert,TransferDom} from 'vux'
   import Icon from '../components/icon.vue'
+  import store from '../store'
   import variable from '../utils/global/variable'
   import {getCookie, changeState} from "../utils/cookie";
 
@@ -46,15 +46,15 @@
     },
     computed: {
       status:function(){
-       return this.$store.getters.curr_state[this.id]+"";
+       return store.getters.curr_state[this.id]+"";
         //return "1";
       },
       status1:function(){
-        return this.$store.getters.curr_state;
+        return store.getters.curr_state;
       },
       showPopup: {
         get() {
-          return this.$store.getters.cleanShow
+          return store.getters.cleanShow
         },
         set(value) {
           if(this.id+""==="-1"){
@@ -64,17 +64,18 @@
             this.code = 1;
             this.show = true;
           }else if(this.status>0){
-            if(this.$store.getters.cruiseShow||this.$store.getters.detectShow){//说明是从别的地方切换过来的
-              this.$store.commit('cleanShow', false);
+            if(store.getters.cruiseShow||store.getters.detectShow){//说明是从别的地方切换过来的
+              store.commit('cleanShow', false);
               this.code = 2;
               this.show = true;
               console.log("就运行的这里");
             }
           }else{
-            if (this.$store.getters.cruiseShow || this.$store.getters.detectShow) {
+            if (store.getters.cruiseShow || store.getters.detectShow) {
               if (value) {
-                this.$store.commit('cruiseShow', false);
-                this.$store.commit('detectShow', false);
+                store.commit('cruiseShow', false);
+                store.commit('detectShow', false);
+                this.$store.commit('canSign', 0);
                 //检测切换事件
               }
             }
@@ -93,7 +94,7 @@
         show:false,
         error:["暂未选船","船尚未上电","船正在运行"],
         tip:["请先选择船","请先开tip船","请勿切换到别的任务"],
-        data:this.$store.getters.curr_state,
+        data:store.getters.curr_state,
       };
 
     },

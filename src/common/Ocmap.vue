@@ -1,13 +1,13 @@
 <template>
   <div class="amap">
-    <div id="amap-main">
-    </div>
+    <div id="amap-main" ></div>
   </div>
 </template>
-<style>
+<style scoped >
   #amap-main {
-    width: 800px;
-    height: 600px;
+    /*width: 100vw;*/
+    /*height: 100vh;*/
+    height: 5.42rem;
   }
 
   /* 覆盖高德logo样式 */
@@ -31,7 +31,7 @@
   import shipIcon2 from '../../static/image/ship2.png'
   import areaIcon from '../../static/image/3.png';
   import areaRoadIcon from '../../static/image/4.png';
-  import { insertShipRoute } from '../api/api';
+  import {insertShipRoute} from '../api/api';
 
   let map;//地图实例
   let polyline;//路径折线
@@ -46,6 +46,8 @@
   let obstacle = []; //障碍区域物实例集合
   let waterline = [];//水质线
   let waterPath = [];//水质点
+  let routeLine;
+  let routeLinePath = [];
   let copy = [];//临时保存数据的数组 要跨函数传参 所以定义全局
   let copy2 = [];//临时数组 因为copy 和copy2会同时用到所以定义俩个
 
@@ -97,8 +99,8 @@
       },
       //获取船坐标
       getShipLngLat(){
-        var ships = [];
-        for (var i=0;i<this.$store.getters.curr_lng.length;i++) {
+        let ships = [];
+        for (let i=0;i<this.$store.getters.curr_lng.length;i++) {
           ships[i] = new Array();
           ships[i][0] = this.$store.getters.curr_lng[i];
           ships[i][1] = this.$store.getters.curr_lat[i];
@@ -109,29 +111,44 @@
       },
       //初始化船
       initShip() {
-        var lnglat;
+        let lnglat;
         if (this.markersShip.length !== 0){
           map.remove(this.markersShip);
         }
-        var Icon = new AMap.Icon({
+        let Icon = new AMap.Icon({
           image: shipIcon,
           imageSize: new AMap.Size(25, 25),
         });
-        for(var i = 0;i<this.ship.length;i++) {
-          lnglat = new AMap.LngLat(this.ship[i][0],this.ship[i][1]);
-          this.markersShip[i] = new AMap.Marker({
-            icon: Icon,
-            map: map,
-            angle: this.shipAngle[i],
-            position: lnglat,
-            extData: i,
-          });
-          this.markersShip[i].on('click',this.chooseShip);
+        let Icon2 = new AMap.Icon({
+          image: shipIcon2,
+          imageSize: new AMap.Size(25, 25),
+        });
+        for(let i = 0;i<this.ship.length;i++) {
+            lnglat = new AMap.LngLat(this.ship[i][0],this.ship[i][1]);
+            if (this.shipChooseId === i) {
+              this.markersShip[i] = new AMap.Marker({
+                icon: Icon2,
+                map: map,
+                angle: this.shipAngle[i],
+                position: lnglat,
+                extData: i,
+              });
+            }else {
+              this.markersShip[i] = new AMap.Marker({
+                icon: Icon,
+                map: map,
+                angle: this.shipAngle[i],
+                position: lnglat,
+                extData: i,
+              });
+            }
+            this.markersShip[i].on('click',this.chooseShip);
         }
+
       },
       //选择船
       chooseShip(e) {
-        var lnglat = new AMap.LngLat(e.target.getPosition().getLng(),e.target.getPosition().getLat());
+        let lnglat = new AMap.LngLat(e.target.getPosition().getLng(),e.target.getPosition().getLat());
         map.setCenter(lnglat);
         this.shipChooseId = e.target.getExtData();
         // console.log(this.shipChooseId);
@@ -162,11 +179,11 @@
       },
       //初始化边界障碍
       initBoundaryAndObstacles(){
-        var lnglat;
-        var boundspath = [];
-        for (var i = 0; i < this.bounds.length; i++) {
+        let lnglat;
+        let boundspath = [];
+        for (let i = 0; i < this.bounds.length; i++) {
           boundspath[i] = new Array();
-          for (var j = 0; j < this.bounds[i].length; j++) {
+          for (let j = 0; j < this.bounds[i].length; j++) {
             lnglat = new AMap.LngLat(this.bounds[i][j][0], this.bounds[i][j][1]);
             boundspath[i][j] = lnglat;
           }
@@ -181,9 +198,9 @@
           map.add(boundary[i]);//添加多边形
         }
         //初始化障碍
-        for (var i = 0; i < this.obstacles.length; i++) {
+        for (let i = 0; i < this.obstacles.length; i++) {
           boundspath[i] = new Array();
-          for (var j = 0; j < this.obstacles[i].length; j++) {
+          for (let j = 0; j < this.obstacles[i].length; j++) {
             lnglat = new AMap.LngLat(this.obstacles[i][j][0], this.obstacles[i][j][1]);
             boundspath[i][j] = lnglat;
           }
@@ -231,17 +248,25 @@
           lineJoin: 'round' // 折线拐点连接处样式
         });
         cleanline.setMap(map);
+
+        routeLine = new AMap.Polyline({
+          path: routeLinePath,
+          borderWeight: 2, // 线条宽度，默认为 1
+          strokeColor: '#fed90c', // 线条颜色
+          lineJoin: 'round' // 折线拐点连接处样式
+        })
+        routeLine.setMap(map);
       },
       //点击地图标点
       addMarker(e) {
         if (this.pointType !== 0 && this.pointType !== 1 && this.pointType !== 2 && this.pointType !== 3) return; //标点类型既不是一又不是二又不是三不允许标点
         if(this.shipChooseId === -1) return;//未选船不能标点
         console.log(e.lnglat);
-        var isPointInRing = this.isPointInRing(e.lnglat);//是否在边界内
+        let isPointInRing = this.isPointInRing(e.lnglat);//是否在边界内
         // console.log('点击时'+isPointInRing);
         //console.log('点击地图'+this.pointType);
         if (!isPointInRing) return;//在边界内return
-        var pointType = this.pointType;
+        let pointType = this.pointType;
         //let icon = "";
         let marker;
         if (pointType === 0) {  //标路径点
@@ -329,11 +354,11 @@
       },
       //移动标记
       moveMarker(e) {
-        var flag = e.target.getExtData();
+        let flag = e.target.getExtData();
         if (flag === 0) {   //路径点移动
           path.length = 0;
-          var lnglat;
-          for (var i = 0; i < this.markers.length; i++) {
+          let lnglat;
+          for (let i = 0; i < this.markers.length; i++) {
             lnglat = new AMap.LngLat(this.markers[i].getPosition().getLng(), this.markers[i].getPosition().getLat());
             path.push(lnglat);
           }
@@ -341,8 +366,8 @@
           polyline.setMap(map);
         } else if (flag === 1) {  //水质点移动
           waterPath.length = 0;
-          var lnglat;
-          for (var i = 0; i < this.markersWater.length; i++) {
+          let lnglat;
+          for (let i = 0; i < this.markersWater.length; i++) {
             lnglat = new AMap.LngLat(this.markersWater[i].getPosition().getLng(), this.markersWater[i].getPosition().getLat());
             waterPath.push(lnglat);
           }
@@ -351,8 +376,8 @@
         } else if (flag === 2) {  //区域移动
           if (this.areaSign === 0) {
             arealinePath.length = 0;
-            var lnglat;
-            for (var i = 0; i < this.markersAraeline.length; i++) {
+            let lnglat;
+            for (let i = 0; i < this.markersAraeline.length; i++) {
               lnglat = new AMap.LngLat(this.markersAraeline[i].getPosition().getLng(), this.markersAraeline[i].getPosition().getLat());
               arealinePath.push(lnglat);
             }
@@ -360,8 +385,8 @@
             arealine.setMap(map);
           } else if (this.areaSign === 1) {
             areaPath.length = 0;
-            var lnglat;
-            for (var i = 0; i < this.markersArae.length; i++) {
+            let lnglat;
+            for (let i = 0; i < this.markersArae.length; i++) {
               lnglat = new AMap.LngLat(this.markersArae[i].getPosition().getLng(), this.markersArae[i].getPosition().getLat());
               areaPath.push(lnglat);
             }
@@ -370,8 +395,8 @@
           }
         } else if (flag === 3) {
           cleanPath.length = 0;
-          var lnglat;
-          for (var i = 0; i < this.markersClean.length; i++) {
+          let lnglat;
+          for (let i = 0; i < this.markersClean.length; i++) {
             lnglat = new AMap.LngLat(this.markersClean[i].getPosition().getLng(), this.markersClean[i].getPosition().getLat());
             cleanPath.push(lnglat);
           }
@@ -415,16 +440,16 @@
       },
       //判断点是否在边界和障碍内
       isPointInRing(lnglat) {
-        var ismarker = false;
-        for (var i = 0; i < boundary.length; i++) { //不能都是false 有一个true就可以返回 表示可以标点
-          var isPointInRing = AMap.GeometryUtil.isPointInRing(lnglat, boundary[i].getPath());
+        let ismarker = false;
+        for (let i = 0; i < boundary.length; i++) { //不能都是false 有一个true就可以返回 表示可以标点
+          let isPointInRing = AMap.GeometryUtil.isPointInRing(lnglat, boundary[i].getPath());
           if (isPointInRing) {
             ismarker = true;
             break;
           }
         }
-        for (var i = 0; i < obstacle.length; i++) {  //都得是false 有一个true 返回 表示不可以标点
-          var isPointInRing = AMap.GeometryUtil.isPointInRing(lnglat, obstacle[i].getPath());
+        for (let i = 0; i < obstacle.length; i++) {  //都得是false 有一个true 返回 表示不可以标点
+          let isPointInRing = AMap.GeometryUtil.isPointInRing(lnglat, obstacle[i].getPath());
           if (isPointInRing) {
             ismarker = false;
             break;
@@ -437,7 +462,7 @@
         copy2[0] = new AMap.LngLat(e.target.getPosition().getLng(), e.target.getPosition().getLat());
         // console.log(copy2[0]);
         if (this.pointType === 0) {
-          for (var i = 0; i < this.markers.length; i++) {
+          for (let i = 0; i < this.markers.length; i++) {
             if (e.target === this.markers[i]) {
               copy2[1] = i;
               //console.log(copy[1]);
@@ -445,7 +470,7 @@
             }
           }
         } else if (this.pointType === 1) {
-          for (var i = 0; i < this.markersWater.length; i++) {
+          for (let i = 0; i < this.markersWater.length; i++) {
             if (e.target === this.markersWater[i]) {
               copy2[1] = i;
               console.log(copy2[1]);
@@ -454,7 +479,7 @@
           }
         } else if (this.pointType === 2) {
           if (this.areaSign === 0) {
-            for (var i = 0; i < this.markersAraeline.length; i++) {
+            for (let i = 0; i < this.markersAraeline.length; i++) {
               if (e.target === this.markersAraeline[i]) {
                 copy2[1] = i;
                 //console.log(copy[1]);
@@ -462,7 +487,7 @@
               }
             }
           } else if (this.areaSign === 1) {
-            for (var i = 0; i < this.markersArae.length; i++) {
+            for (let i = 0; i < this.markersArae.length; i++) {
               if (e.target === this.markersArae[i]) {
                 copy2[1] = i;
                 console.log(copy2[1]);
@@ -471,7 +496,7 @@
             }
           }
         } else if (this.pointType === 3) {
-          for (var i = 0; i < this.markersClean.length; i++) {
+          for (let i = 0; i < this.markersClean.length; i++) {
             if (e.target === this.markersClean[i]) {
               copy2[1] = i;
               //console.log(copy[1]);
@@ -482,17 +507,17 @@
       },
       //拖动后处理
       afterDrag(e) {
-        var lnglat = new AMap.LngLat(e.target.getPosition().getLng(), e.target.getPosition().getLat());
-        var isPointInRing = this.isPointInRing(lnglat);
+        let lnglat = new AMap.LngLat(e.target.getPosition().getLng(), e.target.getPosition().getLat());
+        let isPointInRing = this.isPointInRing(lnglat);
         // console.log('拖动后' + isPointInRing);
-        var areaIntersect = this.areaIntersect();
+        let areaIntersect = this.areaIntersect();
         // console.log('拖动后' + areaIntersect);
         if (!isPointInRing||areaIntersect) {
           if (this.pointType === 0) {
             path.length = 0;
             this.markers[copy2[1]].setPosition(copy2[0]);
-            var lnglat2;
-            for (var i = 0; i < this.markers.length; i++) {
+            let lnglat2;
+            for (let i = 0; i < this.markers.length; i++) {
               lnglat2 = new AMap.LngLat(this.markers[i].getPosition().getLng(), this.markers[i].getPosition().getLat());
               path.push(lnglat2);
             }
@@ -501,8 +526,8 @@
           } else if (this.pointType === 1) {
             waterPath.length = 0;
             this.markersWater[copy2[1]].setPosition(copy2[0]);
-            var lnglat2;
-            for (var i = 0; i < this.markersWater.length; i++) {
+            let lnglat2;
+            for (let i = 0; i < this.markersWater.length; i++) {
               lnglat2 = new AMap.LngLat(this.markersWater[i].getPosition().getLng(), this.markersWater[i].getPosition().getLat());
               waterPath.push(lnglat2);
             }
@@ -512,8 +537,8 @@
             if (this.areaSign === 0) {
               arealinePath.length = 0;
               this.markersAraeline[copy2[1]].setPosition(copy2[0]);
-              var lnglat2;
-              for (var i = 0; i < this.markersAraeline.length; i++) {
+              let lnglat2;
+              for (let i = 0; i < this.markersAraeline.length; i++) {
                 lnglat2 = new AMap.LngLat(this.markersAraeline[i].getPosition().getLng(), this.markersAraeline[i].getPosition().getLat());
                 arealinePath.push(lnglat2);
               }
@@ -522,8 +547,8 @@
             } else if (this.areaSign === 1) {
               areaPath.length = 0;
               this.markersArae[copy2[1]].setPosition(copy2[0]);
-              var lnglat2;
-              for (var i = 0; i < this.markersArae.length; i++) {
+              let lnglat2;
+              for (let i = 0; i < this.markersArae.length; i++) {
                 lnglat2 = new AMap.LngLat(this.markersArae[i].getPosition().getLng(), this.markersArae[i].getPosition().getLat());
                 areaPath.push(lnglat2);
               }
@@ -534,8 +559,8 @@
           } else if (this.pointType === 3) {
             cleanPath.length = 0;
             this.markersClean[copy2[1]].setPosition(copy2[0]);
-            var lnglat2;
-            for (var i = 0; i < this.markersClean.length; i++) {
+            let lnglat2;
+            for (let i = 0; i < this.markersClean.length; i++) {
               lnglat2 = new AMap.LngLat(this.markersClean[i].getPosition().getLng(), this.markersClean[i].getPosition().getLat());
               cleanPath.push(lnglat2);
             }
@@ -546,15 +571,15 @@
       },
       //开始任务构造输出数据
       constructorData(Type){
-        var pathData = '';
-        var areaData = '';
+        let pathData = '';
+        let areaData = '';
         if (Type === 1&&this.pointType === 0){
           console.log(Type);
           if (this.markers.length === 0){
             console.log('巡航路径为空1');
             return
           } else  {
-            for (var i = 0; i < this.markers.length; i++) {
+            for (let i = 0; i < this.markers.length; i++) {
               pathData = pathData + this.markers[i].getPosition().getLng() + ',' + this.markers[i].getPosition().getLat() + ';';
             }
           }
@@ -567,7 +592,7 @@
             console.log('水质路径为空');
             return
           } else {
-            for (var i = 0; i < this.markersWater.length; i++) {
+            for (let i = 0; i < this.markersWater.length; i++) {
               pathData = pathData + this.markersWater[i].getPosition().getLng() + ',' + this.markersWater[i].getPosition().getLat() + ';';
             }
           }
@@ -583,10 +608,10 @@
             this.$store.commit('area',areaPath);
             console.log('未规划路劲');
           }else {
-            for (var i=0;i<this.markersClean.length;i++){
+            for (let i=0;i<this.markersClean.length;i++){
               pathData = pathData+this.markersClean[i].getPosition().getLng()+','+this.markersClean[i].getPosition().getLat()+';';
             }
-            for (var i=0;i<this.markersArae.length;i++){
+            for (let i=0;i<this.markersArae.length;i++){
               areaData = areaData+this.markersArae[i].getPosition().getLng()+','+this.markersArae[i].getPosition().getLat()+';';
             }
             areaData = areaData+this.markersArae[0].getPosition().getLng()+','+this.markersArae[0].getPosition().getLat()+';';
@@ -595,7 +620,7 @@
             this.$store.commit("root",pathData);
             this.$store.commit("area",areaData);
             pathData = '';
-            for (var i=this.markersClean.length-1;i>-1;i--){
+            for (let i=this.markersClean.length-1;i>-1;i--){
               pathData = pathData+this.markersClean[i].getPosition().getLng()+','+this.markersClean[i].getPosition().getLat()+';';
             }
             pathData = '2;'+areaData+pathData;
@@ -607,14 +632,14 @@
       },
       //保存任务构造输出数据
       saveTaskData(Type){
-        var pathData = '';
-        var areaData = '';
+        let pathData = '';
+        let areaData = '';
         if (Type === 1&&this.pointType === 0){
           if (this.markers.length === 0){
             console.log('巡航路径为空1');
             return
           } else  {
-            for (var i = 0; i < this.markers.length; i++) {
+            for (let i = 0; i < this.markers.length; i++) {
               pathData = pathData + this.markers[i].getPosition().getLng() + ',' + this.markers[i].getPosition().getLat() + ';';
             }
           }
@@ -624,7 +649,7 @@
             console.log('水质路径为空');
             return
           } else {
-            for (var i = 0; i < this.markersWater.length; i++) {
+            for (let i = 0; i < this.markersWater.length; i++) {
               pathData = pathData + this.markersWater[i].getPosition().getLng() + ',' + this.markersWater[i].getPosition().getLat() + ';';
             }
           }
@@ -636,10 +661,10 @@
           } else if (this.markersClean.length === 0) {
             console.log('未规划路劲');
           }else {
-            for (var i=0;i<this.markersClean.length;i++){
+            for (let i=0;i<this.markersClean.length;i++){
               pathData = pathData+this.markersClean[i].getPosition().getLng()+','+this.markersClean[i].getPosition().getLat()+';';
             }
-            for (var i=0;i<this.markersArae.length;i++){
+            for (let i=0;i<this.markersArae.length;i++){
               areaData = areaData+this.markersArae[i].getPosition().getLng()+','+this.markersArae[i].getPosition().getLat()+';';
             }
             areaData = areaData+this.markersArae[0].getPosition().getLng()+','+this.markersArae[0].getPosition().getLat()+';';
@@ -652,15 +677,15 @@
       },
       //判断清洁区域是否有交点
       areaIntersect(){
-        var areaIntersect = false;
-        var lnglat1;
-        var lnglat2;
-        var lnglat3;
-        var lnglat4;
-        for (var i=0;i<this.markersAraeline.length-3;i++){
+        let areaIntersect = false;
+        let lnglat1;
+        let lnglat2;
+        let lnglat3;
+        let lnglat4;
+        for (let i=0;i<this.markersAraeline.length-3;i++){
           lnglat1 = new AMap.LngLat(this.markersAraeline[i].getPosition().getLng(),this.markersAraeline[i].getPosition().getLat());
           lnglat2 = new AMap.LngLat(this.markersAraeline[i+1].getPosition().getLng(),this.markersAraeline[i+1].getPosition().getLat());
-          for (var j=i+2;j<this.markersAraeline.length-1;j++){
+          for (let j=i+2;j<this.markersAraeline.length-1;j++){
             lnglat3 = new AMap.LngLat(this.markersAraeline[j].getPosition().getLng(),this.markersAraeline[j].getPosition().getLat());
             lnglat4 = new AMap.LngLat(this.markersAraeline[j+1].getPosition().getLng(),this.markersAraeline[j+1].getPosition().getLat());
             areaIntersect = AMap.GeometryUtil.doesSegmentsIntersect(lnglat1, lnglat2, lnglat3, lnglat4);
@@ -675,22 +700,21 @@
         if (this.markersAraeline.length !== 0 ) {
           lnglat1 = new AMap.LngLat(this.markersAraeline[0].getPosition().getLng(), this.markersAraeline[0].getPosition().getLat());
           lnglat2 = new AMap.LngLat(this.markersAraeline[this.markersAraeline.length - 1].getPosition().getLng(), this.markersAraeline[this.markersAraeline.length - 1].getPosition().getLat());
-          for (var i = 1; i < this.markersArae.length - 2; i++) {
+          for (let i = 1; i < this.markersArae.length - 2; i++) {
             lnglat3 = new AMap.LngLat(this.markersAraeline[i].getPosition().getLng(), this.markersAraeline[i].getPosition().getLat());
             lnglat4 = new AMap.LngLat(this.markersAraeline[i + 1].getPosition().getLng(), this.markersArae[i + 1].getPosition().getLat());
             areaIntersect = AMap.GeometryUtil.doesSegmentsIntersect(lnglat1, lnglat2, lnglat3, lnglat4);
             if (areaIntersect) {
               console.log('交线');
               console.log((i + 1) + '  ' + (i + 2));
-              console.log((j + 1) + '  ' + (j + 2));
               return areaIntersect
             }
           }
         }
-        for (var i=0;i<this.markersArae.length-3;i++){
+        for (let i=0;i<this.markersArae.length-3;i++){
           lnglat1 = new AMap.LngLat(this.markersArae[i].getPosition().getLng(),this.markersArae[i].getPosition().getLat());
           lnglat2 = new AMap.LngLat(this.markersArae[i+1].getPosition().getLng(),this.markersArae[i+1].getPosition().getLat());
-          for (var j=i+2;j<this.markersArae.length-1;j++){
+          for (let j=i+2;j<this.markersArae.length-1;j++){
             lnglat3 = new AMap.LngLat(this.markersArae[j].getPosition().getLng(),this.markersArae[j].getPosition().getLat());
             lnglat4 = new AMap.LngLat(this.markersArae[j+1].getPosition().getLng(),this.markersArae[j+1].getPosition().getLat());
             areaIntersect = AMap.GeometryUtil.doesSegmentsIntersect(lnglat1, lnglat2, lnglat3, lnglat4);
@@ -705,14 +729,14 @@
         if (this.markersArae.length !== 0 ) {
           lnglat1 = new AMap.LngLat(this.markersArae[0].getPosition().getLng(), this.markersArae[0].getPosition().getLat());
           lnglat2 = new AMap.LngLat(this.markersArae[this.markersArae.length - 1].getPosition().getLng(), this.markersArae[this.markersArae.length - 1].getPosition().getLat());
-          for (var i = 1; i < this.markersArae.length - 2; i++) {
+          for (let i = 1; i < this.markersArae.length - 2; i++) {
             lnglat3 = new AMap.LngLat(this.markersArae[i].getPosition().getLng(), this.markersArae[i].getPosition().getLat());
             lnglat4 = new AMap.LngLat(this.markersArae[i + 1].getPosition().getLng(), this.markersArae[i + 1].getPosition().getLat());
             areaIntersect = AMap.GeometryUtil.doesSegmentsIntersect(lnglat1, lnglat2, lnglat3, lnglat4);
             if (areaIntersect) {
               console.log('交线');
               console.log((i + 1) + '  ' + (i + 2));
-              console.log((j + 1) + '  ' + (j + 2));
+              //console.log((j + 1) + '  ' + (j + 2));
               return areaIntersect
             }
           }
@@ -722,7 +746,7 @@
       //数据转化1;a,b;这种数据类型转化为AMap.LngLat数组 不返回1 用在重现任务
       parseData(lnglat){
         lnglat = lnglat.slice(1,lnglat.length);
-        for (var i=0;i<lnglat.length;i++){
+        for (let i=0;i<lnglat.length;i++){
           lnglat[i] = lnglat[i].split(",");
           lnglat[i][0] = parseFloat(lnglat[i][0]);
           lnglat[i][1] = parseFloat(lnglat[i][1]);
@@ -733,7 +757,7 @@
       //任务重现
       loadActiveTask(activeTask){
         let marker;
-        var lnglat = activeTask.split(";");
+        let lnglat = activeTask.split(";");
         lnglat.length = lnglat.length-1;
         if (lnglat[0] === '0'){
           this.$store.commit("signMethod",0);
@@ -743,7 +767,7 @@
             imageSize: new AMap.Size(18, 18),
           });
           lnglat = this.parseData(lnglat);
-          for (var i=0;i<lnglat.length;i++){
+          for (let i=0;i<lnglat.length;i++){
             marker = new AMap.Marker({
               icon: this.icon,
               map: map,
@@ -766,7 +790,7 @@
             imageSize: new AMap.Size(18, 18),
           });
           lnglat = this.parseData(lnglat);
-          for (var i=0;i<lnglat.length;i++){
+          for (let i=0;i<lnglat.length;i++){
             marker = new AMap.Marker({
               icon: this.icon,
               map: map,
@@ -789,7 +813,7 @@
             imageSize: new AMap.Size(18, 18),
           });
           lnglat = this.parseData(lnglat);
-          for (var i=0;i<lnglat.length;i++){
+          for (let i=0;i<lnglat.length;i++){
             marker = new AMap.Marker({
               icon: this.icon,
               map: map,
@@ -806,7 +830,17 @@
           }
         }
 
-      }
+      },
+      // change(){
+      //   let lat = this.$store.getters.curr_lat;
+      //   let tem = lat[1]+0.00001;
+      //   tem = Math.floor(tem * 10000000) / 10000000;
+      //   lat.splice(1,1,tem);
+      //   tem = lat[0]+0.00001;
+      //   tem = Math.floor(tem * 10000000) / 10000000;
+      //   lat.splice(0,1,tem);
+      //   this.$store.commit('curr_lat',lat);
+      // },
     },
     computed: {
       pointType() {
@@ -846,10 +880,10 @@
         return this.$store.getters.canSign;
       },
       bounds(){
-        var lnglat = [];
-        var tem;
-        var j = 0;
-        for (var i= 0;i<this.$store.getters.boundsAndObstacles.length;i++){
+        let lnglat = [];
+        let tem;
+        let j = 0;
+        for (let i= 0;i<this.$store.getters.boundsAndObstacles.length;i++){
           tem = this.$store.getters.boundsAndObstacles[i].split(';');
           if (tem[0] === 'b'){
             tem = tem.slice(1,tem.length-1);
@@ -857,8 +891,8 @@
             j++;
           }
         }
-        for (var i=0;i<j;i++){
-          for (var k=0;k<lnglat[i].length;k++){
+        for (let i=0;i<j;i++){
+          for (let k=0;k<lnglat[i].length;k++){
             lnglat[i][k] = lnglat[i][k].split(',');
             lnglat[i][k][0] = parseFloat(lnglat[i][k][0]);
             lnglat[i][k][1] = parseFloat(lnglat[i][k][1]);
@@ -867,10 +901,10 @@
         return lnglat;
       },
       obstacles(){
-        var lnglat = [];
-        var tem;
-        var j = 0;
-        for (var i= 0;i<this.$store.getters.boundsAndObstacles.length;i++){
+        let lnglat = [];
+        let tem;
+        let j = 0;
+        for (let i= 0;i<this.$store.getters.boundsAndObstacles.length;i++){
           tem = this.$store.getters.boundsAndObstacles[i].split(';');
           if (tem[0] === 'o'){
             tem = tem.slice(1,tem.length-1);
@@ -878,8 +912,8 @@
             j++;
           }
         }
-        for (var i=0;i<j;i++){
-          for (var k=0;k<lnglat[i].length;k++){
+        for (let i=0;i<j;i++){
+          for (let k=0;k<lnglat[i].length;k++){
             lnglat[i][k] = lnglat[i][k].split(',');
             lnglat[i][k][0] = parseFloat(lnglat[i][k][0]);
             lnglat[i][k][1] = parseFloat(lnglat[i][k][1]);
@@ -892,9 +926,7 @@
     watch: {
       //监听类型变化
       pointType(newType, oldType) {
-        if (newType === 3){
-          map.on('click', this.addMarker);
-        }
+        this.$store.commit('canSign',1);
         if (newType !== -1){
           this.initIcon();
         }
@@ -949,13 +981,49 @@
             map.on('click', this.addMarker)
           }
         }
+
+        if (newType === 2){
+          for(let i = 0;i< this.markersClean.length;i++) {
+            this.markersClean[i].off('dragging', this.moveMarker);//绑定按下事件
+            this.markersClean[i].off('mousedown', this.getLngLat);
+            this.markersClean[i].off('dragend', this.afterDrag);
+            this.markersClean[i].off('touchstart', this.getLngLat);
+            this.markersClean[i].setDraggable(false);
+          }
+          for(let i = 0;i< this.markersArae.length;i++){
+            this.markersArae[i].on('click', this.addArea);
+            this.markersArae[i].on('mousemove', this.afterAddArea);
+            this.markersArae[i].on('dragging', this.moveMarker);
+            this.markersArae[i].on('mousedown', this.getLngLat);
+            this.markersArae[i].on('dragend', this.afterDrag);
+            this.markersArae[i].on('touchstart', this.getLngLat);
+            this.markersArae[i].setDraggable(true);
+          }
+        } else if(newType === 3){
+          for(let i = 0;i< this.markersArae.length;i++){
+            this.markersArae[i].off('dragging', this.moveMarker);//绑定按下事件
+            this.markersArae[i].off('mousedown', this.getLngLat);
+            this.markersArae[i].off('dragend', this.afterDrag);
+            this.markersArae[i].off('touchstart', this.getLngLat);
+            this.markersArae[i].setDraggable(false);
+          }
+          for(let i = 0;i< this.markersClean.length;i++){
+            this.markersClean[i].on('click', this.addArea);
+            this.markersClean[i].on('mousemove', this.afterAddArea);
+            this.markersClean[i].on('dragging', this.moveMarker);
+            this.markersClean[i].on('mousedown', this.getLngLat);
+            this.markersClean[i].on('dragend', this.afterDrag);
+            this.markersClean[i].on('touchstart', this.getLngLat);
+            this.markersClean[i].setDraggable(true);
+          }
+        }
       },
       //监听删除
       isdel(newIs, oldIs) {
         console.log('删除');
         //等于1撤销
         if (newIs % 2 === 1) {
-          map.on('click', this.addMarker)
+          map.on('click', this.addMarker);
           if (this.pointType === 0) {
             if (this.markers.length === 0) return;
             this.markers[this.markers.length - 1].setMap(null);
@@ -1036,6 +1104,20 @@
       //监听船坐标变化
       ship(newShip, oldShip){
         this.initShip();
+        let routePath = this.$store.getters.shipRoad;
+        for (let i=0;i<newShip.length;i++){
+            if (!routePath[i]){
+                routePath[i] = [];
+            }else {
+              routePath[i].push(newShip[i]);
+            }
+        }
+        this.$store.commit("shipRoad",routePath);
+        for (let i=0;i<routePath[this.shipChooseId].length;i++){
+          routeLinePath[i] = new AMap.LngLat(routePath[this.shipChooseId][i][0],routePath[this.shipChooseId][i][1]);
+        }
+        routeLine.setPath(routeLinePath);
+        routeLine.setMap(map);
       },
       //监听船角度变化
       shipAngle(newAngle,oldAngle){
@@ -1043,15 +1125,15 @@
       },
       //监听当前所选船的变化
       shipChooseId(newId,oldId){
-        var lnglat = new AMap.LngLat(this.ship[newId][0],this.ship[newId][1]);
+        let lnglat = new AMap.LngLat(this.ship[newId][0],this.ship[newId][1]);
         map.setCenter(lnglat);
-        var icon = new AMap.Icon({
+        let icon = new AMap.Icon({
           image: shipIcon2,
           imageSize: new AMap.Size(25, 25),
         });
         this.markersShip[newId].setIcon(icon);
         if (oldId !== -1){
-          var icon = new AMap.Icon({
+          let icon = new AMap.Icon({
             image: shipIcon,
             imageSize: new AMap.Size(25, 25),
           });
@@ -1092,14 +1174,20 @@
           }
         }
         if(this.$store.getters.activeTask[newId]){
-          var activeTask = this.$store.getters.activeTask[newId];
+          let activeTask = this.$store.getters.activeTask[newId];
           this.loadActiveTask(activeTask);
         }
+        let routePath = this.$store.getters.shipRoad;
+        for (let i=0;i<routePath[newId].length;i++){
+          routeLinePath[i] = new AMap.LngLat(routePath[newId][i][0],routePath[newId][i][1]);
+        }
+        routeLine.setPath(routeLinePath);
+        routeLine.setMap(map);
       },
       //监听船状态
       // shipState(newState,oldState){
       //   console.log('状态更新');
-      //   var tem = this.$store.getters.activeTask;
+      //   let tem = this.$store.getters.activeTask;
       //   delete tem[newState];
       //   this.$store.commit('activeTask',tem);
       //   console.log(this.$store.getters.activeTask);

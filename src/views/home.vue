@@ -1,8 +1,7 @@
 <template>
   <div class="amap">
-    <div id="amap-main" ></div>
     <!--<p>这里其实根据船的数目有多个</p>-->
-    <Ocmap  ></Ocmap>
+    <Ocmap></Ocmap>
     <div v-for="ship in chuans">
       <div v-if="ship.value">
         <cruise v-bind:id="ship.id"></cruise>
@@ -15,8 +14,6 @@
       <clean v-bind:id="-1"></clean>
       <detect v-bind:id="-1"></detect>
     </div>
-
-
 <!--    <p>当任务结束的时候弹出询问框，暂时先不管是否再来一圈？？</p>-->
   </div>
 </template>
@@ -26,6 +23,7 @@
   import Clean from '../common/clean'
   import Detect from '../common/detect'
   import Ocmap from '../common/Ocmap'
+  import store from '../store'
 
   import { selectBound } from "../api/api";
   import { getCookie } from "../utils/cookie";
@@ -41,20 +39,20 @@
       return {
         // getCookie("totalShip")
         count:4,
-        present:this.$store.getters.shipChooseId,
+        present:store.getters.shipChooseId,
 
       }
     },
     computed: {
       show(){
-        return this.$store.getters.shipChooseId===-1;//用于未上电状态的提醒。
+        return store.getters.shipChooseId===-1;//用于未上电状态的提醒。
       },
       chuans(){
         let temp =[];
         let object;
         for(let i=0;i<this.count;i++){
           object ={id:i,value:false};
-          if(i===this.$store.getters.shipChooseId) {
+          if(i===store.getters.shipChooseId) {
             object = {id:i,value:true};
           }
           temp.push(object);
@@ -76,7 +74,7 @@
           alert(msg);
         }
         //  this.present = this.temp.value;  //把刚才临时保存的值给当前的值
-        this.$store.commit('shipChooseId',this.temp.value);
+        store.commit('shipChooseId',this.temp.value);
         this.headerTop = this.temp.name;
         // 确定要切换船，就要切换
 
@@ -93,9 +91,6 @@
 </script>
 
 <style>
-  #amap-main {
-    height: 5.42rem;
-  }
   /* 覆盖高德logo样式 */
   .amap .amap-logo {
     right: -10000px !important;

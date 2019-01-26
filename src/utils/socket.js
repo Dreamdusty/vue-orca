@@ -7,7 +7,7 @@ let webSocket = null;
 let global_callback = null;
 let send = null;
 let receive =[];
-let clean =[];
+let distant =[];
 let data = '&lnglat;108.897001,34.248031;108.897339,34.248022;6;1#';
 /*
 let data=[[{108.897001,34.248031;108.897339,34.248022;}
@@ -66,7 +66,8 @@ function sendSocket(agentData, callback) {
 data 是一个对象数组
  */
 function sendAreaPoint(id,area,clean){
-  data ="&lnglat;"+area+clean+";"+id+"#";
+ // console.log("不会这里都没有数据吧"+id);
+  let data ="&lnglat;"+area+clean+";"+id+"#";
   sendSocket(data);
 }
 function getReceive(id){
@@ -75,11 +76,11 @@ function getReceive(id){
 function setReceive(id,data){
   receive[id]=data;
 }
-function getClean(id){
-  return clean[id];
+function getDistant(id){
+  return distant[id];
 }
-function setClean(id,data){
-  clean[id]=data;
+function setDistant(id,data){
+  distant[id]=data;
 }
 function start(id){
   let data = '$A;'+id+'#';
@@ -106,32 +107,13 @@ function recover(){
 
 
 function rechange(data){
-  let temp="";  //缓存想要写回去的字符串
-  let count=0;
-  console.log("接收"+data);
-  //这个代码要改，不能存二维数组，应该直接直接变为字符串
+  console.log("接收到的数据"+data);
   let id = parseInt(data[data.length-2]);
-  for(let i=8;i<data.length-4;i++){
-    if(data[i]!=="["&&data[i]!=="]") {
-      if (data[i] !== ",") {
-        temp += data[i];
-      } else if (data[i] === ',') {
-        if (count % 2 === 0 ) {
-          temp += ",";
-          count++;
-        } else {
-         // console.log("ccc"+count);
-          temp += ";";
-          count++;
-        }
-      }
-    }
-  }
-  temp = temp.substring(0,temp.length-1);
-  clean[id]=data[data.length-4];
-  receive[id]=temp;
-  console.log("打印"+receive[id]);
-
+  data = data.substring(8,data.length-3);
+  console.log(data+"////"+data.split(";").length);
+  let index = find(data,';',data.split(";").length-1);//最后一个 ； 的下标
+  receive[id] = data.substring(0,index-1);
+  distant[id] = data.substring(index+1,data.length-1);
 }
 // 数据接收
 function socketMessage(e) {
@@ -150,12 +132,16 @@ function socketMessage(e) {
     if(topicContent==="BASIC"){ // if(getCookie('account')===data.ship_id){//用户对不
       let data = JSON.parse(msg);
       //更新所有的变量。
-
       let temp = store.getters.curr_state;
+      if(data.state ===-3){//让船知道任务结束了
+        store.commit('finishTofuthree',ship);
+        console.log("....."+store.getters.finishTofuthree);
+      }
       if(temp[ship]!==data.state){
-        if(data.temp===0){
+        if(data.state===0){
           store.commit('finishTaskShip',ship);
         }
+
         temp.splice(ship,1,data.state);
         store.commit("curr_state",temp);
       }
@@ -217,7 +203,18 @@ function socketOpen() {//就是说当前用户的信息是保存在cookie里面�
   socketSend('&ship_id;' +5 + '#');
   socketSend('&total_ship;' + 5 + '#');
 }
+function find(str,cha,num){
 
+  var x=str.indexOf(cha);
+  for(var i=1;i<num;i++){
+    x=str.indexOf(cha,x+1);
+    if(x===-1){
+      break;
+    }
+   // console.log("00"+x);
+  }
+  return x;
+}
 
 
 //在这里面写发送的请求：

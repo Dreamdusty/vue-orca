@@ -26,6 +26,7 @@ const state = {
     'o;108.897353,34.247879;108.897351,34.247825;108.89729,34.247817;108.897289,34.247886;'],//边界障碍集合
   saveRoute:[],
   finishTaskShip:-1,//
+  finishTofuthree:-1,
   curr_state:[0,0,0],
   curr_lat:[34.247559,34.247005,34.248211],
   curr_lng:[108.89662,108.898846,108.896261],
@@ -34,6 +35,8 @@ const state = {
   rame_time:[],//剩余时间
   curr_battle:[],//当前电量
   curr_speed:[],//当前船速
+ // receive:[],
+  shipRoad:[],//历史路径
 };
 
 export default new Vuex.Store({
@@ -113,6 +116,15 @@ export default new Vuex.Store({
     },
     finishTaskShip:state => {
       return state.finishTaskShip;
+    },
+/*    receive:state => {
+      return state.receive;
+    },*/
+    finishTofuthree:state => {
+      return state.finishTofuthree;
+    },
+    shipRoad:state => {
+      return state.shipRoad;
     },
   },
   mutations: {
@@ -295,7 +307,27 @@ export default new Vuex.Store({
         state.finishTaskShip = !state.finishTaskShip;
       }
     },
-
+/*    receive(state,value){
+      if(value !== undefined){
+        state.receive = value;
+      }else{
+        state.receive = !state.receive;
+      }
+    },*/
+    finishTofuthree(state,value){
+      if(value !== undefined){
+        state.finishTofuthree = value;
+      }else{
+        state.finishTofuthree = !state.finishTofuthree;
+      }
+    },
+    shipRoad(state,value){
+      if(value !== undefined){
+        state.shipRoad = value;
+      }else{
+        state.shipRoad = !state.shipRoad;
+      }
+    },
   },
   actions: { // 让外界能通过异步调用的方式 改变 show
     cruiseShow ({commit}) {
@@ -373,7 +405,14 @@ export default new Vuex.Store({
     finishTaskShip ({commit}) {
       commit('finishTaskShip');
     },
-
-
-  }
+/*    receive ({commit}) {
+      commit('receive');
+    },*/
+    finishTofuthree({commit}){
+      commit('finishTofuthree');
+    }
+  },
+  shipRoad ({commit}) {
+    commit('shipRoad');
+  },
 });

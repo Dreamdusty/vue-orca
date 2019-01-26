@@ -98,10 +98,11 @@ const router = new Router({
 // 这个是请求页面路由的时候会验证token存不存在，不存在的话会到登录页
 router.beforeEach((to, from, next) => {
   if (to.meta.requireAuth) {
-    fetch('/api/mobile/login/verification').then(res => {
+    fetch('/mobile/login/verification').then(res => {
       if(res.code === 200) {
         next();
       } else {
+        this.$store.commit('cookie', true);
         if (getCookie('AppCookieToken')) {
           delCookie('AppCookieToken');
         }

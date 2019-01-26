@@ -83,6 +83,8 @@
     <toast v-model="showToast" text="任务正在开启中"></toast>
     <toast v-model="startError" text="出现错误"></toast>
     <toast v-model="showSuccessful" text="设置成功"></toast>
+    <toast v-model="startNetError" text="网络出现故障，请重新开始任务"></toast>
+
 
 
 
@@ -96,6 +98,7 @@
   import { TabbarItem,TransferDom,Popup,InlineXNumber,XButton,Grid,GridItem,Selector,Group,Popover,Checklist,Picker,GroupTitle,Alert,Toast} from 'vux'
   import {sendAreaPoint,start,end,recover,stop,back,getReceive,setReceive,getClean,setClean} from "../utils/socket";
   import { addRoute } from "../api/api";
+  import store from '../store'
   // let 可以改变值， const 不可改变值
   let sign= {name:'标点', src:'../static/image/logo.png', func: this.fsign};
   //let signRegion = {name:'标点', src:'../static/image/logo.png', func: this.fsign};
@@ -145,7 +148,7 @@
   let threegroupfu3 = [];     //任务结束，要让用户选择是否保存。
   let threegroupfu2 = [stopBack,endBack];//返航中
   let threegroupfu1 = [reStartTask,startBack,endTask,backMethod];
-
+  let count=0;
 
   //-5是返航
 
@@ -212,6 +215,7 @@
         showToast:false,
         showSuccessful:false,
         startError:false,
+        startNetError:false,
        // toastCode:-1,
        // toastTip:["任务开启","设置成功"],
         showError:false,
@@ -223,14 +227,14 @@
     },
     computed:{
       area(){
-        return this.$store.getters.area;
+        return store.getters.area;
 
       },
       route(){
-        return this.$store.getters.root;
+        return store.getters.root;
       },
      // saveRoute(){
-     //   return this.$store.getters.saveRoute;
+     //   return store.getters.saveRoute;
     //  },
       icons(){
       //  console.log("张涵想要的数据："+this.status);
@@ -342,15 +346,15 @@
           }else{
             this.signMethodToFather =0;//正常的路径点
           }
-          this.$store.commit('canSign',this.canSign);
-          this.$store.commit('signMethod',this.signMethodToFather);
+          store.commit('canSign',this.canSign);
+          store.commit('signMethod',this.signMethodToFather);
           //使得标点的时候弹框下去
-          // if(this.$store.getters.detectShow){
-          //   this.$store.commit('detectShow', false);
-          // }else if(this.$store.getters.cleanShow) {
-          //   this.$store.commit('cleanShow', false);
-          // }else if(this.$store.getters.cruiseShow){
-          //   this.$store.commit('cruiseShow', false);
+          // if(store.getters.detectShow){
+          //   store.commit('detectShow', false);
+          // }else if(store.getters.cleanShow) {
+          //   store.commit('cleanShow', false);
+          // }else if(store.getters.cruiseShow){
+          //   store.commit('cruiseShow', false);
           // }
 
         }
@@ -358,36 +362,36 @@
       fdeleteOne() {
         this.canDelete = 1+2*i;
         i++;
-        this.$store.commit('canDelete',this.canDelete);
+        store.commit('canDelete',this.canDelete);
       },
       fclear() {
         this.canDelete = 2+2*i;
         i++;
-        this.$store.commit('canDelete',this.canDelete);
+        store.commit('canDelete',this.canDelete);
 
       },
       fcricle() {
         this.canSign = 0;
-        this.$store.commit('canSign',0);  //不准标点了
-        if (this.$store.getters.cruiseShow || this.$store.getters.detectShow|| this.$store.getters.cleanShow) {
+        store.commit('canSign',0);  //不准标点了
+        if (store.getters.cruiseShow || store.getters.detectShow|| store.getters.cleanShow) {
             //console.log("关闭其它");
-            this.$store.commit('cruiseShow', false);
-            this.$store.commit('detectShow', false);
-            this.$store.commit('cleanShow', false);
+            store.commit('cruiseShow', false);
+            store.commit('detectShow', false);
+            store.commit('cleanShow', false);
         }
 
         this.cricleShow=true;
       },
       fstartTask() {
         this.canSign = 0;
-        this.$store.commit('canSign',0);  //不准标点了
+        store.commit('canSign',0);  //不准标点了
         this.startTask =(this.startTask +1)%10;
         let temp =[parseInt(this.type),this.startTask];
-        this.$store.commit("startTask",temp);
-      /* var name = this.$store.getters.curr_state;
+        store.commit("startTask",temp);
+      /* var name = store.getters.curr_state;
         name.splice(1,1,1);
       // name[1] = 0;
-       this.$store.commit('curr_state',name);*/
+       store.commit('curr_state',name);*/
       },
       fendTask() {
         end();
@@ -400,7 +404,7 @@
       },
       fbackmethod() {
         this.canSign = 0;
-        this.$store.commit('canSign',0);  //不准标点了
+        store.commit('canSign',0);  //不准标点了
         this.backMethodSelect = true;
 
       },
@@ -419,16 +423,16 @@
       fdetectionTime() {
         this.timeSelect = true;
         this.canSign = 0;
-        this.$store.commit('canSign',0);  //不准标点了
+        store.commit('canSign',0);  //不准标点了
 
       },
       fsaveRoute(){
         //this.canSign = 0;
-       // this.$store.commit('canSign',0);  //不准标点了
+       // store.commit('canSign',0);  //不准标点了
         console.log("save");
         this.saveRoute =(this.saveRoute +1)%10;
         let temp =[parseInt(this.type),this.saveRoute];
-        this.$store.commit("saveRoute",temp);
+        store.commit("saveRoute",temp);
       },
       fcleanliness(){
         this.cleanShow = true;
@@ -488,13 +492,13 @@
          this.cricleShow=false;
          if(this.type==="1"){
            //console.log("巡航");
-           this.$store.commit('cruiseShow', true);
+           store.commit('cruiseShow', true);
          }else if(this.type==="2"){
            console.log("水质");
-           this.$store.commit('detectShow', true);
+           store.commit('detectShow', true);
          }else if(this.type==="3") {
            console.log("清洁");
-           this.$store.commit('cleanShow', true);
+           store.commit('cleanShow', true);
          }
       },
       setSignMethod(){
@@ -504,8 +508,8 @@
         }else if(this.signMethod[0]==="区域点"){
           this.signMethodToFather=2;
         }
-        this.$store.commit('canSign',this.canSign);
-        this.$store.commit('signMethod', this.signMethodToFather);
+        store.commit('canSign',this.canSign);
+        store.commit('signMethod', this.signMethodToFather);
         //this.showSuccessful = true;
 
       },
@@ -565,7 +569,40 @@
         resultRoute = resultRoute.substring(0, resultRoute.length - 1);
         console.log(resultRoute);
         return resultRoute;
-      }
+      },
+      addOneRoute(){
+        console.log("确认id是对的"+this.id);
+        if(count++>5){
+          return;
+        }
+        setTimeout(() =>{
+          let areatemp = getReceive(this.id);
+         console.log("从庞长松那里拿到的数据"+this.route+areatemp);
+          if(areatemp===undefined){
+            this.startNetError = true;
+            return;
+          }
+          // console.log("距离"+getClean(this.id));
+          let object ={ship_id:3,route:this.route+store.getters.area,turns:this.cricleNumToFather,cleanliness:this.cleanliness,real_route:this.route+areatemp};
+          addRoute(object).then(res => {
+            console.log("res:====" + res.data.data);
+            if (res.data.code !== 200) {
+              // this.$toast(res.data.message);
+              this.startError=true;
+              console.log("错误" + res.data.message);
+            } else {//正确
+              let  id = res.data.data;
+              console.log("id:" + res.data.data);
+              start(id);//给船发指令
+              this.showToast =true;//弹出提示框
+            }
+          });
+          store.commit('root',"");
+          setReceive(this.id,"");
+          // setClean(this.id,0);
+       //   console.log("////////////这里执行完之后再执行socket？");
+        },500);
+      },
     },
     props:['status','type','id'],
     watch:{
@@ -576,7 +613,7 @@
         this.$emit('changeHeight',newval);
       },
       area(newval,oldval){
-        if(this.$store.getters.shipChooseId+""===(this.id+"")){
+        if(store.getters.shipChooseId+""===(this.id+"")){
           if(this.type==='3'){//清洁功能
             //console.log('清洁功能.............................'+this.type+"...."+this.id);
 
@@ -590,34 +627,10 @@
               this.errorCode=1;
               console.log("区域不闭合");
             }else{
+             // let tempid = this.id;
               sendAreaPoint(this.id,newval,this.cleanTofather);//将区域点进行处理，得到realroute。
-              let areatemp;
-             /* while(getReceive(this.id)===""||getReceive(this.id)===undefined){//等到这个东西不为空
-                console.log("陷在循环里面"+getReceive(this.id));
-              }*/
-              areatemp = getReceive(this.id);
-             // console.log("从庞长松那里拿到的数据"+areatemp);
-              console.log("距离"+getClean(this.id));
-             // let splitRoute = this.route.split(";");
-             // let splitareaTemp = this
-             // let start = split.length-2;
-              let object ={ship_id:3,route:this.route+newval,turns:this.cricleNumToFather,cleanliness:this.cleanliness,real_route:this.route+areatemp};
-              addRoute(object).then(res => {
-                console.log("res:====" + res.data.data);
-                if (res.data.code !== 200) {
-                  // this.$toast(res.data.message);
-                  this.startError=true;
-                  console.log("错误" + res.data.message);
-                } else {//正确
-                 let  id = res.data.data;
-                  console.log("id:" + res.data.data);
-                  start(id);//给船发指令
-                  this.showToast =true;//弹出提示框
-                }
-              });
-              this.$store.commit('root',"");
-              setReceive(this.id,"");
-              setClean(this.id,0);
+              this.addOneRoute();
+             //单线程的
 
             }
 
@@ -633,14 +646,14 @@
       route(newval,oldval){
        // console.log("我就看看这个类型到底是多少"+this.type);
         //就是说还要判断如何
-       if (this.$store.getters.shipChooseId+""===(this.id+"")&&newval!==""&&this.$store.getters.cleanShow!==true){
+       if (store.getters.shipChooseId+""===(this.id+"")&&newval!==""&&store.getters.cleanShow!==true){
          if(this.type!=='3'){//当这个变量变化的时候还需要判断是不是这艘船在发生变化，
           // console.log("///////////////////////////////////"+this.type+"////"+this.id);
            let route = this.handleRoute(newval);//真实的路径let
            let object;
            let id;
            //看看圈数的初始值
-           if(this.$store.getters.detectShow===true&&this.type==='2'){
+           if(store.getters.detectShow===true&&this.type==='2'){
              //console.log("执行水质");
              object = {ship_id:3,route:newval,turns:this.cricleNumToFather,water_time:this.timeToFather,real_route:route};
              addRoute(object).then(res =>{
@@ -657,8 +670,8 @@
 
                }
              });
-             this.$store.commit('root',"");//将路径点置空
-           }else if(this.$store.getters.cruiseShow===true&&this.type==='1'){//说明是巡航点
+             store.commit('root',"");//将路径点置空
+           }else if(store.getters.cruiseShow===true&&this.type==='1'){//说明是巡航点
              //console.log("执行巡航");
              object = {ship_id:3,route:newval,turns:this.cricleNumToFather,real_route:route};
              addRoute(object).then(res => {
@@ -675,9 +688,9 @@
 
                }
              });
-            // this.$store.commit('root',"");//将路径点置空
+            // store.commit('root',"");//将路径点置空
            }
-           this.$store.commit('root',"");//将路径点置空
+           store.commit('root',"");//将路径点置空
           // console.log("这里执行了两次");
 
 
