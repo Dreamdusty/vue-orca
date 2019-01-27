@@ -7,7 +7,10 @@
   #amap-main {
     /*width: 100vw;*/
     /*height: 100vh;*/
-    height: 5.42rem;
+    height: 6rem !important;
+    width: 94vw !important;
+    border-radius: 15px !important;
+    margin-left: 3vw !important;
   }
 
   /* 覆盖高德logo样式 */

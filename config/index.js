@@ -17,7 +17,7 @@ module.exports = {
         pathRewrite: {
           // '^/api' 就等于写'http://localhost:6666'
           // "/api/login/account" 就等于写 "http://localhost:6666/login/account"
-          '^/': '/'
+          '^/api': '/'
         }
       }
     },

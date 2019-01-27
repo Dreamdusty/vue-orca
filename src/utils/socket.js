@@ -65,9 +65,14 @@ function sendSocket(agentData, callback) {
 发送区域点
 data 是一个对象数组
  */
-function sendAreaPoint(id,area,clean){
+function sendAreaPoint(id,area,route,clean){
  // console.log("不会这里都没有数据吧"+id);
-  let data ="&lnglat;"+area+clean+";"+id+"#";
+
+  let index = find(route,';',route.split(";").length-2);//最后一个 ； 的下标
+  let lastPoint = route.substring(index+1,route.length);
+ // console.log("最后一个点"+lastPoint);
+  let data ="&lnglat;"+area+lastPoint+clean+";"+id+"#";
+//  console.log(data);
   sendSocket(data);
 }
 function getReceive(id){

@@ -628,7 +628,7 @@
               console.log("区域不闭合");
             }else{
              // let tempid = this.id;
-              sendAreaPoint(this.id,newval,this.cleanTofather);//将区域点进行处理，得到realroute。
+              sendAreaPoint(this.id,newval, this.route, this.cleanTofather);//将区域点进行处理，得到realroute。
               this.addOneRoute();
              //单线程的
 
