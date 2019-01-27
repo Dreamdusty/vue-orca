@@ -24,19 +24,7 @@
         </div>
       </popup>
     </div>
-    <div v-transfer-dom>
-      <popup v-model="signMethodSelect" position="bottom" height="50%"  @on-hide="closesignMethodSelect"
-             :is-transparent="false"
-             :show-mask="false">
-        <div class="popup">
-          <group>
-            <checklist :title="'船需要由路径点引导至区域中进行区域清理'" :options="signMethodList" v-model="signMethod" :max="1"></checklist>
-          </group>
-          <x-button type="primary" @click.native="setSignMethod" style="width:100px;margin-top:30px" >确定</x-button>
-        </div>
-      </popup>
-    </div>
-    <!--<div>选择返航方式</div>-->
+
 
     <div v-transfer-dom>
       <popup v-model="backMethodSelect" position="bottom" height="50%"  @on-hide="closebackMethodSelect"
@@ -117,6 +105,9 @@
   let detectionTime = {name:"检测时间",src:"../static/image/logo.png",func:this.fdetectionTime};
   let saveRoute = {name:"保存路线",src:"../static/image/logo.png"};//
   let cleanliness = {name:"清洁程度",src:"../static/image/logo.png"};//清洁程度
+  let areaSign = {name:'区域标点',src:"../static/image/logo.png"};
+  let routeSign = {name:'路径标点',src:'../static/image/logo.png'};
+  let endSign = {name:'结束标点',src:'../static/image/logo.png'};
   //让保存路线在开始任务之后，
 
   //one 代码巡航功能，two代表水质功能 ，three清洁功能
@@ -148,6 +139,7 @@
   let threegroupfu3 = [];     //任务结束，要让用户选择是否保存。
   let threegroupfu2 = [stopBack,endBack];//返航中
   let threegroupfu1 = [reStartTask,startBack,endTask,backMethod];
+  let threeGroupSign = [routeSign,areaSign,deleteOne,clear,endSign];
   let count=0;
 
   //-5是返航
@@ -220,8 +212,8 @@
        // toastTip:["任务开启","设置成功"],
         showError:false,
         errorCode:-1,
-        errorTitle:["未标路径点","区域未闭合"],
-        errorTip:["请标路径点","请点击第一个点使得区域闭合"],
+        errorTitle:["区域未闭合或无路径标点",'尚未标点'],
+        errorTip:["请合理标注区域和路径",'请合理标点之后再点击开始'],
 
       }
     },
@@ -236,109 +228,121 @@
      // saveRoute(){
      //   return store.getters.saveRoute;
     //  },
-      icons(){
+      icons:{
+        get(){
+          if(this.status+""!=="0"){
+            this.height = 130;
+          }
+          if(this.type+""==="3")
+          {
+            this.type = "3";
+            console.log("此时的类型"+this.type);
+            if(this.status==='0'&&this.signMethodSelect===true){
+             // console.log("改变高度");
+             // this.height = 130;
+              return threeGroupSign;
+
+            }
+            switch(this.status){
+              case '0':
+                console.log("eeeee");
+                this.height = 210;
+                return threegroup0;
+              case '-11':
+                return threegroupfu11;
+              case '1':
+                return threegroup1;
+              case '-10':
+                return threegroupfu10;
+              case '-4':
+                return threegroupfu4;
+              case '-3':
+                return threegroupfu3;
+              case '-2':
+                return threegroupfu2;
+              case '-1':
+                return threegroupfu1;
+              default:
+                break;
+            }
+            if(this.status>0){
+              return twogroup1;
+            }
+          }
+          else if(this.type+""==="2"){
+            this.type = "2";
+            //  console.log("此时的状态"+this.type);
+            switch(this.status){
+              case '0':
+                console.log("/////////////////");
+                this.height = 210;
+                return twogroup0;
+              case '-11':
+                return twogroupfu11;
+              case '0':
+                return twogroup0;
+              case '-10':
+                return twogroupfu10;
+              case '-4':
+                return twogroupfu4;
+              case '-3':
+                return twogroupfu3;
+              case '-2':
+                return twogroupfu2;
+              case '-1':
+                return twogroupfu1;
+              default:
+                break;
+            }
+            if(this.status>0){
+              return twogroup1;
+            }
+
+          }else if(this.type+""==="1"){
+            this.type = "1";
+            // console.log("此时的状态"+this.type);
+            switch(this.status){
+              case '0':
+                this.height = 210;
+                return onegroup0;
+              case '-11':
+                return onegroupfu11;
+              case '0':
+                return onegroup0;
+              case '-10':
+                return onegroupfu10;
+              case '-4':
+                return onegroupfu4;
+              case '-3':
+                return onegroupfu3;
+              case '-2':
+                return onegroupfu2;
+              case '-1':
+                return onegroupfu1;
+              default:
+                break;
+            }
+            if(this.status>0){
+              return onegroup1;
+            }
+          }
+
+        },
+        },
+        set(icons){
+          return icons;
+        },
       //  console.log("张涵想要的数据："+this.status);
-        if(this.type+""==="3")
-        {
-          this.type = "3";
-          console.log("此时的类型"+this.type);
 
-          switch(this.status){
-            case '0':
-              console.log("eeeee");
-              this.height = 210;
-              return threegroup0;
-            case '-11':
-              return threegroupfu11;
-            case '1':
-              return threegroup1;
-            case '-10':
-              return threegroupfu10;
-            case '-4':
-              return threegroupfu4;
-            case '-3':
-              return threegroupfu3;
-            case '-2':
-              return threegroupfu2;
-            case '-1':
-              return threegroupfu1;
-            default:
-              break;
-          }
-          if(this.status>0){
-            return twogroup1;
-          }
-        }
-        else if(this.type+""==="2"){
-          this.type = "2";
-        //  console.log("此时的状态"+this.type);
-          switch(this.status){
-            case '0':
-              this.height = 210;
-              return twogroup0;
-            case '-11':
-              return twogroupfu11;
-            case '0':
-              return twogroup0;
-            case '-10':
-              return twogroupfu10;
-            case '-4':
-              return twogroupfu4;
-            case '-3':
-              return twogroupfu3;
-            case '-2':
-              return twogroupfu2;
-            case '-1':
-              return twogroupfu1;
-            default:
-              break;
-          }
-          if(this.status>0){
-            return twogroup1;
-          }
-
-        }else if(this.type+""==="1"){
-          this.type = "1";
-         // console.log("此时的状态"+this.type);
-          switch(this.status){
-            case '0':
-              this.height = 210;
-              return onegroup0;
-            case '-11':
-              return onegroupfu11;
-            case '0':
-              return onegroup0;
-            case '-10':
-              return onegroupfu10;
-            case '-4':
-              return onegroupfu4;
-            case '-3':
-              return onegroupfu3;
-            case '-2':
-              return onegroupfu2;
-            case '-1':
-              return onegroupfu1;
-            default:
-              break;
-          }
-          if(this.status>0){
-            return onegroup1;
-          }
-        }
-        if(this.status+""!=="0"){
-          this.height = 130;
-        }
-
-
-
-      },
 
     },
     methods: {
       fsign() {
         if(this.type==="3"){
           this.canSign = 1;
+          //保存
           this.signMethodSelect = true;
+          //this.icon = threeGroupSign;
         }else{
           this.canSign = 1;
           if(this.type==="2"){
@@ -358,6 +362,18 @@
           // }
 
         }
+      },
+      frouteSign(){
+        this.$store.commit('signMethod',3);
+      },
+      fareaSign(){
+        this.$store.commit('canSign',1);
+        this.$store.commit('signMethod',2);
+      },
+      fendSign(){
+        this.canSign = 0;
+        this.$store.commit('canSign',this.canSign);
+        this.signMethodSelect = false;
       },
       fdeleteOne() {
         this.canDelete = 1+2*i;
@@ -386,12 +402,17 @@
         this.canSign = 0;
         store.commit('canSign',0);  //不准标点了
         this.startTask =(this.startTask +1)%10;
+        console.log(this.$store.getters.root);
+        console.log(this.area);
+        //如果没有标点，应该提示。
         let temp =[parseInt(this.type),this.startTask];
         store.commit("startTask",temp);
-      /* var name = store.getters.curr_state;
-        name.splice(1,1,1);
-      // name[1] = 0;
-       store.commit('curr_state',name);*/
+        console.log(this.errorCode);
+        if(this.errorCode===0){
+          this.showError = true;
+        }
+
+
       },
       fendTask() {
         end();
@@ -476,6 +497,12 @@
            this.fsaveRoute();
          }else if(operation==='清洁程度'){
            this.fcleanliness();
+         }else if(operation==='路径标点'){
+           this.frouteSign();
+         }else if(operation==='区域标点'){
+           this.fareaSign();
+         }else if(operation==='结束标点'){
+           this.fendSign();
          }
 
 
@@ -552,6 +579,7 @@
       handleRoute(route){
         let fanRoute ="";
         let resultRoute = "";
+      //  console.log(route);
         let split = route.split(";");
         for(var i=split.length-2;i>0;i--){//减掉两个东西  1->2->3->4->3->2  偶数的时候还要存一下第一个点  ，奇数的时候没啥说的
           fanRoute +=split[i]+";";
@@ -597,7 +625,7 @@
               this.showToast =true;//弹出提示框
             }
           });
-          store.commit('root',"");
+         // store.commit('root',"[]);
           setReceive(this.id,"");
           // setClean(this.id,0);
        //   console.log("////////////这里执行完之后再执行socket？");
@@ -610,6 +638,7 @@
       console.log("prop变化了没有"+val);
       },
       height:function(newval){
+        console.log('触发改变高度');
         this.$emit('changeHeight',newval);
       },
       area(newval,oldval){
@@ -618,18 +647,17 @@
             //console.log('清洁功能.............................'+this.type+"...."+this.id);
 
             //console.log("///////////////"+this.route);
-            if(this.route+""===""){
+            if(this.route+""===""||newval===""){
               this.showError=true;
               this.errorCode=0;
-              console.log("路径不允许为空");
-            }else if(newval===""){//说明当区域不闭合的时候，这个里面为[]
-              this.showError=true;
-              this.errorCode=1;
-              console.log("区域不闭合");
+             // console.log("路径不允许为空");
             }else{
+              this.errorCode=-1;
              // let tempid = this.id;
               sendAreaPoint(this.id,newval, this.route, this.cleanTofather);//将区域点进行处理，得到realroute。
               this.addOneRoute();
+              this.$store.commit('root',"");
+
              //单线程的
 
             }
@@ -653,8 +681,10 @@
            let object;
            let id;
            //看看圈数的初始值
-           if(store.getters.detectShow===true&&this.type==='2'){
-             //console.log("执行水质");
+          // console.log(store.getters.detectShow);
+          // console.log("类型"+this.type);
+           if(store.getters.detectShow===true){
+             console.log("执行水质");
              object = {ship_id:3,route:newval,turns:this.cricleNumToFather,water_time:this.timeToFather,real_route:route};
              addRoute(object).then(res =>{
                console.log("res:====" + res.data.data);
@@ -672,7 +702,7 @@
              });
              store.commit('root',"");//将路径点置空
            }else if(store.getters.cruiseShow===true&&this.type==='1'){//说明是巡航点
-             //console.log("执行巡航");
+             console.log("执行巡航");
              object = {ship_id:3,route:newval,turns:this.cricleNumToFather,real_route:route};
              addRoute(object).then(res => {
                console.log("res:====" + res.data.data);

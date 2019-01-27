@@ -4,7 +4,7 @@ import Vue from 'vue'
 import VueAMap from 'vue-amap'
 import App from './App'
 import router from './router/index'
-import { ToastPlugin } from 'vux'
+import { ToastPlugin, AlertPlugin, ConfigPlugin } from 'vux'
 import toastMessages from './utils/global/toast'
 import store from './store'
 import variable from './utils/global/variable'
@@ -14,6 +14,8 @@ import * as socketApi from './utils/socket'
 
 Vue.use(VueAMap);
 Vue.use(ToastPlugin);
+Vue.use(AlertPlugin);
+Vue.use(ConfigPlugin);
 Vue.use(toastMessages);
 // Vue.use(ElementUI);
 

@@ -7,10 +7,21 @@
   #amap-main {
     /*width: 100vw;*/
     /*height: 100vh;*/
-    height: 6rem !important;
+    /*height: 6rem !important;*/
     width: 94vw !important;
     border-radius: 15px !important;
     margin-left: 3vw !important;
+    -webkit-appearance: none !important;
+    /*padding-bottom: 0;*/
+    height: 90vh !important;
+
+    -moz-border-radius: 15px; /* Firefox */
+    -webkit-border-radius: 15px; /* Safari 和 Chrome */
+
+    /*-moz-box-shadow: 10px 10px 20px #000; !* Firefox *!*/
+    /*-webkit-box-shadow: 10px 10px 20px #000; !* Safari 和 Chrome *!*/
+    /*box-shadow: 10px 10px 20px #000; !* Opera 10.5+, 以及使用了IE-CSS3的IE浏览器 *!*/
+    /*behavior: url(ie-css3.htc); !* 通知IE浏览器调用脚本作用于'box'类 *!*/
   }
 
   /* 覆盖高德logo样式 */
@@ -108,8 +119,9 @@
           ships[i][0] = this.$store.getters.curr_lng[i];
           ships[i][1] = this.$store.getters.curr_lat[i];
         }
-        console.log('船');
+        console.log('船位置');
         console.log(ships);
+        console.log('=======================================')
         return ships;
       },
       //初始化船
@@ -133,6 +145,7 @@
                 icon: Icon2,
                 map: map,
                 angle: this.shipAngle[i],
+                offset:new AMap.Pixel(-12, -10),
                 position: lnglat,
                 extData: i,
               });
@@ -141,6 +154,7 @@
                 icon: Icon,
                 map: map,
                 angle: this.shipAngle[i],
+                offset:new AMap.Pixel(-12, -10),
                 position: lnglat,
                 extData: i,
               });
@@ -834,16 +848,16 @@
         }
 
       },
-      // change(){
-      //   let lat = this.$store.getters.curr_lat;
-      //   let tem = lat[1]+0.00001;
-      //   tem = Math.floor(tem * 10000000) / 10000000;
-      //   lat.splice(1,1,tem);
-      //   tem = lat[0]+0.00001;
-      //   tem = Math.floor(tem * 10000000) / 10000000;
-      //   lat.splice(0,1,tem);
-      //   this.$store.commit('curr_lat',lat);
-      // },
+      change(){
+        let lat = this.$store.getters.curr_lat;
+        let tem = lat[1]+0.00001;
+        tem = Math.floor(tem * 10000000) / 10000000;
+        lat.splice(1,1,tem);
+        tem = lat[0]+0.00001;
+        tem = Math.floor(tem * 10000000) / 10000000;
+        lat.splice(0,1,tem);
+        this.$store.commit('curr_lat',lat);
+      },
     },
     computed: {
       pointType() {
@@ -1120,6 +1134,9 @@
           routeLinePath[i] = new AMap.LngLat(routePath[this.shipChooseId][i][0],routePath[this.shipChooseId][i][1]);
         }
         routeLine.setPath(routeLinePath);
+        console.log('路劲线')
+        console.log(routeLinePath);
+        console.log('======================================')
         routeLine.setMap(map);
       },
       //监听船角度变化

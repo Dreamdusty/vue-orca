@@ -15,6 +15,14 @@
       <detect v-bind:id="-1"></detect>
     </div>
 <!--    <p>当任务结束的时候弹出询问框，暂时先不管是否再来一圈？？</p>-->
+    <div v-transfer-dom>
+      <confirm v-model="showEnd"
+               :title="'id为'+savefinish+'船执行任务已完成，是否再来一圈？'"
+               @on-cancel="anotherCricle"
+               @on-confirm="onConfirmEnd">
+        <!--<p style="text-align:center;">是否再来一圈</p>-->
+      </confirm>
+    </div>
   </div>
 </template>
 
@@ -24,7 +32,8 @@
   import Detect from '../common/detect'
   import Ocmap from '../common/Ocmap'
   import store from '../store'
-
+  import {end} from '../utils/socket'
+  import {TransferDom,Confirm} from 'vux'
   import { selectBound } from "../api/api";
   import { getCookie } from "../utils/cookie";
   import { rayCasting, rayBarrier } from "../utils/route/routeMapLoading";
@@ -40,6 +49,8 @@
         // getCookie("totalShip")
         count:4,
         present:store.getters.shipChooseId,
+        showEnd: false,
+        savefinish: -1,
 
       }
     },
@@ -68,6 +79,15 @@
       onCancel () {
         console.log('on cancel')
       },
+      anotherCricle() {//再来一圈
+        end();
+
+      },
+      onConfirmEnd() {
+        console.log("结束");
+        end();
+        //this.showEnd = true;
+      },
       onConfirm (msg) {//确定再来一圈？
         console.log('on confirm')
         if (msg) {
@@ -86,6 +106,10 @@
       Clean,
       Detect,
       Ocmap,
+      Confirm,
+    },
+    directives: {
+      TransferDom
     },
   }
 </script>
