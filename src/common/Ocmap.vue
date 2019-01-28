@@ -5,23 +5,13 @@
 </template>
 <style scoped >
   #amap-main {
-    /*width: 100vw;*/
-    /*height: 100vh;*/
-    /*height: 6rem !important;*/
     width: 94vw !important;
-    border-radius: 15px !important;
     margin-left: 3vw !important;
     -webkit-appearance: none !important;
-    /*padding-bottom: 0;*/
     height: 90vh !important;
-
+    transform: translate3d(0,0,0) !important;
     -moz-border-radius: 15px; /* Firefox */
     -webkit-border-radius: 15px; /* Safari 和 Chrome */
-
-    /*-moz-box-shadow: 10px 10px 20px #000; !* Firefox *!*/
-    /*-webkit-box-shadow: 10px 10px 20px #000; !* Safari 和 Chrome *!*/
-    /*box-shadow: 10px 10px 20px #000; !* Opera 10.5+, 以及使用了IE-CSS3的IE浏览器 *!*/
-    /*behavior: url(ie-css3.htc); !* 通知IE浏览器调用脚本作用于'box'类 *!*/
   }
 
   /* 覆盖高德logo样式 */

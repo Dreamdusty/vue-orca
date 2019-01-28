@@ -41,14 +41,13 @@
       <view-box ref="viewBox">
         <x-header :left-options="{showBack: false}" style="height: 54px; background-color: rgba(255, 255, 255, 0)">
           <x-icon @click.native="drawerToggle" slot="overwrite-left" type="navicon" size="35" class="over"></x-icon>
-          <div>
+          <div class="vpopover">
             <popover placement="bottom" style="margin:0px;">
               <div slot="content" class="popover-demo-content">
-                <div v-for="ship in shipList">
+                <div class="popover-demo-content-ship" v-for="ship in shipList">
                   <x-button @click.native="confirmShow(ship)"
-                            style="padding:10px 20px 10px 20px; border-style: none;">{{ship.name}}
+                            style="padding:0px 70px; color: #FFFFFF; background-color: rgba(255, 255, 255, 0); border-radius: 99px">{{ship.name}}
                   </x-button>
-                  <hr>
                 </div>
               </div>
               <x-button class="btn btn-default"
@@ -88,7 +87,7 @@
         </tabbar>
       </view-box>
     </drawer>
-    <div v-transfer-dom>
+    <div v-transfer-dom style="border-radius: 50px;">
       <confirm v-model="show"
                :title="'确定换一艘船'"
                @on-cancel="onCancel"
@@ -152,7 +151,7 @@
         items: [],
         paths: [],
         ///headerTop:'请选择船',
-        shipList: [{name: '浐灞', value: 0}, {name: '兴庆', value: 1}, {name: '浐灞1', value: 2}],
+        shipList: [{name: '浐灞01', value: 0}, {name: '丰庆', value: 1}, {name: '浐灞02', value: 2}],
         ship: ['浐灞'],
         show: false,
         //present:0,
@@ -259,6 +258,7 @@
         // }
         // this.drawerShow = false; // 路由跳转、关闭侧边栏
 
+        // if (this.path === '/' && getCookie("AppCookieToken")) {
         if (getCookie("AppCookieToken")) {
           store.commit('cookie', true);
           this.$router.push({
@@ -289,7 +289,7 @@
   }
 </script>
 
-<style scoped lang="less">
+<style lang="less">
   @import '~vux/src/styles/reset.less';
   @import '~vux/src/styles/1px.less';
   @import '~vux/src/styles/tap.less';
@@ -319,7 +319,7 @@
   .over {
     fill: #fff !important;
     position: relative !important;
-    top: -8px !important;
+    top: -5px !important;
     left: -3px !important;
   }
 
@@ -390,8 +390,15 @@
     outline: 0;
   }
 
+  .vpopover,.vux-popover.v-transfer-dom{
+    border-radius: 20px;
+    margin-left: 0px;
+  }
 
-  .view {
-
+  .vpopover,.weui-btn.weui-btn_default:after{
+    border: 1px none rgba(0, 0, 0, 0.2);
+  }
+  #vux_view_box_body{
+    overflow: hidden;
   }
 </style>
