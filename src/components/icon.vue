@@ -2,7 +2,7 @@
   <div>
     <div class="icon-grid">
       <grid :show-lr-borders="false" :cols="4">
-        <div v-for="icon in icons">
+        <div v-for="icon in icons" :key="icon.id">
           <grid-item @on-item-click="Handler(icon.name)">
             <img slot="icon" v-bind:src="icon.src" alt="">
             <span slot="label" class="grid-center">{{icon.name}}</span>
@@ -41,7 +41,10 @@
     </div>
     <!-- <div>选择检测时间</div>时间范围为5到15秒，用那种表一样的滑动-->
     <div v-transfer-dom>
-      <popup v-model="timeSelect" position="bottom" height="50%" @on-hide="closeTimeSelect"
+      <!--<popup v-model="timeSelect" position="bottom" height="50%" @on-hide="closeTimeSelect"-->
+             <!--:is-transparent="false"-->
+             <!--:show-mask="false">-->
+      <popup position="bottom" height="50%" @on-hide="closeTimeSelect"
              :is-transparent="false"
              :show-mask="false">
         <div class="popup">
@@ -112,26 +115,26 @@
   import {addRoute} from "../api/api";
   import store from '../store'
   // let 可以改变值， const 不可改变值
-  let sign = {name: '标点', src: '../static/image/区域清洁/路径规划 (2).png', func: this.fsign};
+  let sign = {name: '标点', src: '../static/img/add/1.png', func: this.fsign};
   //let signRegion = {name:'标点', src:'../static/image/logo.png', func: this.fsign};
-  let deleteOne = {name: '撤销', src: '../static/image/区域清洁/撤销.png', func: this.fdeleteOne};
-  let clear = {name: '清除标点', src: '../static/image/区域清洁/全部清除.png', func: this.fclear};
-  let cricle = {name: '循环圈数', src: '../static/image/区域清洁/循环次数 (2).png', func: this.fcricle};
-  let startTask = {name: "开始任务", src: "../static/image/logo.png", func: this.fstartTask};
-  let endTask = {name: "结束任务", src: "../static/image/logo.png", func: this.fendTask};
-  let stopTask = {name: "暂停任务", src: "../static/image/logo.png", func: this.fstopTask};
-  let reStartTask = {name: "继续任务", src: "../static/image/logo.png", func: this.freStartTask};
-  let backMethod = {name: "返航方式", src: "../static/image/区域清洁/返航方式 (2).png", func: this.fbackmethod};
-  let startBack = {name: "开始返航", src: "../static/image/logo.png", func: this.fstartBack};
-  let endBack = {name: "结束返航", src: "../static/image/logo.png", func: this.fendBack};
-  let stopBack = {name: "暂停返航", src: "../static/image/logo.png", func: this.fstopBack};
-  let reStartBack = {name: "继续返航", src: ".../static/image/logo.png", func: this.freStartBack};
-  let detectionTime = {name: "检测时间", src: "../static/image/logo.png", func: this.fdetectionTime};
-  let saveRoute = {name: "保存路线", src: "../static/image/logo.png"};//
-  let cleanliness = {name: "清洁程度", src: "../static/image/区域清洁/清洁程度 (2).png"};//清洁程度
-  let areaSign = {name: '区域标点', src: "../static/image/区域清洁/路径规划 (2).png"};
-  let routeSign = {name: '路径标点', src: '../static/image/区域清洁/路径规划 (2).png'};
-  let endSign = {name: '结束标点', src: '../static/image/logo.png'};
+  let deleteOne = {name: '撤销', src: '../static/img/clean/cancelSelected.png', func: this.fdeleteOne};
+  let clear = {name: '清除标点', src: '../static/img/clean/clearSelected.png', func: this.fclear};
+  let cricle = {name: '循环圈数', src: '../static/img/clean/cycles.png', func: this.fcricle};
+  let startTask = {name: "开始任务", src: "../static/img/add/2.png", func: this.fstartTask};
+  let endTask = {name: "结束任务", src: "../static/img/add/3.png", func: this.fendTask};
+  let stopTask = {name: "暂停任务", src: "../static/img/add/4.png", func: this.fstopTask};
+  let reStartTask = {name: "继续任务", src: "../static/img/add/2.png", func: this.freStartTask};
+  let backMethod = {name: "返航方式", src: "../static/img/clean/returnMode.png", func: this.fbackmethod};
+  let startBack = {name: "开始返航", src: "../static/img/add/5.png", func: this.fstartBack};
+  let endBack = {name: "结束返航", src: "../static/img/add/6.png", func: this.fendBack};
+  let stopBack = {name: "暂停返航", src: "../static/img/add/7.png", func: this.fstopBack};
+  let reStartBack = {name: "继续返航", src: ".../static/img/add/5.png", func: this.freStartBack};
+  let detectionTime = {name: "检测时间", src: "../static/img/add/8.png", func: this.fdetectionTime};
+  let saveRoute = {name: "保存路线", src: "../static/img/add/9.png"};//
+  let cleanliness = {name: "清洁程度", src: "../static/img/clean/cleanliness.png"};//清洁程度
+  let areaSign = {name: '区域标点', src: "../static/img/clean/regPlan.png"};
+  let routeSign = {name: '路径标点', src: '../static/img/clean/routePlan.png'};
+  let endSign = {name: '结束标点', src: '../static/img/add/1.png'};
   //让保存路线在开始任务之后，
 
   //one 代码巡航功能，two代表水质功能 ，three清洁功能
@@ -650,7 +653,7 @@
               this.showToast = true;//弹出提示框
             }
           });
-          // store.commit('root',"[]);
+          store.commit('root',"");
           setReceive(this.id, "");
           // setClean(this.id,0);
           //   console.log("////////////这里执行完之后再执行socket？");
@@ -681,7 +684,7 @@
               // let tempid = this.id;
               sendAreaPoint(this.id, newval, this.route, this.cleanTofather);//将区域点进行处理，得到realroute。
               this.addOneRoute();
-              this.$store.commit('root', "");
+              // this.$store.commit('root', "");
 
               //单线程的
 

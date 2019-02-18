@@ -3,7 +3,7 @@
     <div id="amap-main" ></div>
   </div>
 </template>
-<style scoped >
+<style scoped>
   #amap-main {
     width: 94vw !important;
     margin-left: 3vw !important;
@@ -29,12 +29,12 @@
 
 <script>
   import {lazyAMapApiLoaderInstance} from 'vue-amap';
-  import roadIcon from '../../static/image/1.png';
-  import waterIcon from '../../static/image/2.png';
-  import shipIcon from '../../static/image/Ship.png';
-  import shipIcon2 from '../../static/image/ship2.png'
-  import areaIcon from '../../static/image/3.png';
-  import areaRoadIcon from '../../static/image/4.png';
+  import roadIcon from '../../static/img/1.png';
+  import waterIcon from '../../static/img/2.png';
+  import shipIcon from '../../static/img/Ship.png';
+  import shipIcon2 from '../../static/img/ship2.png'
+  import areaIcon from '../../static/img/3.png';
+  import areaRoadIcon from '../../static/img/4.png';
   import {insertShipRoute} from '../api/api';
 
   let map;//地图实例
@@ -109,9 +109,8 @@
           ships[i][0] = this.$store.getters.curr_lng[i];
           ships[i][1] = this.$store.getters.curr_lat[i];
         }
-        console.log('船位置');
+        console.log('船');
         console.log(ships);
-        console.log('=======================================')
         return ships;
       },
       //初始化船
@@ -135,7 +134,6 @@
                 icon: Icon2,
                 map: map,
                 angle: this.shipAngle[i],
-                offset:new AMap.Pixel(-12, -10),
                 position: lnglat,
                 extData: i,
               });
@@ -144,7 +142,6 @@
                 icon: Icon,
                 map: map,
                 angle: this.shipAngle[i],
-                offset:new AMap.Pixel(-12, -10),
                 position: lnglat,
                 extData: i,
               });
@@ -838,16 +835,16 @@
         }
 
       },
-      change(){
-        let lat = this.$store.getters.curr_lat;
-        let tem = lat[1]+0.00001;
-        tem = Math.floor(tem * 10000000) / 10000000;
-        lat.splice(1,1,tem);
-        tem = lat[0]+0.00001;
-        tem = Math.floor(tem * 10000000) / 10000000;
-        lat.splice(0,1,tem);
-        this.$store.commit('curr_lat',lat);
-      },
+      // change(){
+      //   let lat = this.$store.getters.curr_lat;
+      //   let tem = lat[1]+0.00001;
+      //   tem = Math.floor(tem * 10000000) / 10000000;
+      //   lat.splice(1,1,tem);
+      //   tem = lat[0]+0.00001;
+      //   tem = Math.floor(tem * 10000000) / 10000000;
+      //   lat.splice(0,1,tem);
+      //   this.$store.commit('curr_lat',lat);
+      // },
     },
     computed: {
       pointType() {
@@ -1124,9 +1121,6 @@
           routeLinePath[i] = new AMap.LngLat(routePath[this.shipChooseId][i][0],routePath[this.shipChooseId][i][1]);
         }
         routeLine.setPath(routeLinePath);
-        console.log('路劲线')
-        console.log(routeLinePath);
-        console.log('======================================')
         routeLine.setMap(map);
       },
       //监听船角度变化

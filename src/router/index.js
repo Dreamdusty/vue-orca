@@ -5,7 +5,6 @@ import { getCookie, delCookie } from "../utils/cookie";
 
 const Index = resolve => require(['/views/login'], resolve); // 登录
 const Home = resolve => require(['/views/home'], resolve); // 主页
-const Demo = resolve => require(['/views/demo'], resolve);
 
 Vue.use(Router);
 
@@ -22,7 +21,7 @@ const routes = [
     path: '/home',
     name: 'home',
     component: Home,
-    meta: { requireAuth: false },
+    meta: { requireAuth: true },
     iconCls: '',
     // children: [
       // {
@@ -98,11 +97,12 @@ const router = new Router({
 // 这个是请求页面路由的时候会验证token存不存在，不存在的话会到登录页
 router.beforeEach((to, from, next) => {
   if (to.meta.requireAuth) {
-    fetch('/mobile/login/verification').then(res => {
+    post('/mobile/login/verification').then(res => {
       if(res.code === 200) {
         next();
       } else {
-        this.$store.commit('cookie', true);
+        // this.$store.commit('cookie', 'true');
+        // this.$store.commit('cookie', true);
         if (getCookie('AppCookieToken')) {
           delCookie('AppCookieToken');
         }

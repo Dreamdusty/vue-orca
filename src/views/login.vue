@@ -47,7 +47,7 @@
       return {
         data: '',
         images: {
-          backgroundImage: "url(" + require("../../static/image/登陆界面/切图-02.png") + ") ",
+          backgroundImage: "url(" + require("../../static/img/login/back.png") + ") ",
           backgroundRepeat: "no-repeat",
           backgroundSize: "100%",
           width: "100%",

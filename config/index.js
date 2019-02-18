@@ -11,20 +11,21 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
-      '/api': {
-        target: 'http://120.78.143.247:7777/orcatech/',
+      '/mobile': {
+        target: 'http://120.78.143.247:7777/orcatech/mobile',
+        // target: 'http://localhost:7777/mobile',
         changeOrigin: true,
         pathRewrite: {
           // '^/api' 就等于写'http://localhost:6666'
           // "/api/login/account" 就等于写 "http://localhost:6666/login/account"
-          '^/api': '/'
+          '^/mobile': ''
         }
       }
     },
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST
-    port: 8080, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
+    port: 80, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
     autoOpenBrowser: false,
     errorOverlay: true,
     notifyOnErrors: true,
@@ -38,9 +39,9 @@ module.exports = {
     env: require('./prod.env'),
     index: path.resolve(__dirname, '../dist/index.html'),
     assetsRoot: path.resolve(__dirname, '../dist'),
-    assetsSubDirectory: 'static',
+    assetsSubDirectory: '',
     assetsPublicPath: './',
-    productionSourceMap: true,
+    productionSourceMap: false,
     // https://webpack.js.org/configuration/devtool/#production
     devtool: '#source-map',
     productionGzip: false,

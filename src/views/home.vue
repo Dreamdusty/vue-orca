@@ -2,7 +2,7 @@
   <div class="amap">
     <!--<p>这里其实根据船的数目有多个</p>-->
     <Ocmap></Ocmap>
-    <div v-for="ship in chuans">
+    <div v-for="ship in chuans" :key="ship.id">
       <div v-if="ship.value">
         <cruise v-bind:id="ship.id"></cruise>
         <clean v-bind:id="ship.id"></clean>
@@ -34,10 +34,6 @@
   import store from '../store'
   import {end} from '../utils/socket'
   import {TransferDom,Confirm} from 'vux'
-  import { selectBound } from "../api/api";
-  import { getCookie } from "../utils/cookie";
-  import { rayCasting, rayBarrier } from "../utils/route/routeMapLoading";
-  import variable from "../utils/global/variable"
 //fzp123  123456
   let map;
   let marker;
@@ -80,10 +76,16 @@
         console.log('on cancel')
       },
       anotherCricle() {//再来一圈
+        this.$store.commit('cruiseShow', false);
+        this.$store.commit('cleanShow', false);
+        this.$store.commit('detectShow', false);
         end();
 
       },
       onConfirmEnd() {
+        this.$store.commit('cruiseShow', false);
+        this.$store.commit('cleanShow', false);
+        this.$store.commit('detectShow', false);
         console.log("结束");
         end();
         //this.showEnd = true;

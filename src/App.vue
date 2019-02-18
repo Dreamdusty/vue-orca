@@ -1,13 +1,14 @@
 <template>
   <div id="app">
-    <router-view name="index" v-if="false"></router-view>
+    <!--<router-view name="index" v-if="!cookie"></router-view>-->
+    <login v-if="!cookie"></login>
     <drawer
       :show.sync="drawerShow"
       :show-mode="tran"
       :placement="pos"
       @on-hide="onHide"
       @on-show="onShow"
-      v-if="true"
+      v-if="cookie"
       :style="img">
       <!-- 不执行 -->
       <!--@change-show="changeDrawerShow"-->
@@ -17,7 +18,7 @@
         <div class="head">
           <!-- 头像 -->
           <div class="avatar">
-            <img class="img" src="../static/image/avatar.jpg" alt="">
+            <img class="img" src="../static/img/avatar.jpg" alt="">
           </div>
           <div class="login">
             <p class="log1">欧卡小蓝船</p>
@@ -25,13 +26,13 @@
           </div>
         </div>
         <group class="top">
-          <cell title="主页" link="/">
-          </cell>
           <cell title="设置边界及避障" link="/">
           </cell>
-          <cell title="任务" link="../views/demo">
+          <cell title="路径" link="/">
           </cell>
-          <cell title="数据" link="/">
+          <cell title="数据" link="../views/demo">
+          </cell>
+          <cell title="任务" link="/">
           </cell>
           <cell title="个人设置" link="/">
           </cell>
@@ -44,9 +45,10 @@
           <div class="vpopover">
             <popover placement="bottom" style="margin:0px;">
               <div slot="content" class="popover-demo-content">
-                <div class="popover-demo-content-ship" v-for="ship in shipList">
+                <div class="popover-demo-content-ship" v-for="ship in shipList" :key="ship.id">
                   <x-button @click.native="confirmShow(ship)"
-                            style="padding:0px 70px; color: #FFFFFF; background-color: rgba(255, 255, 255, 0); border-radius: 99px">{{ship.name}}
+                            style="padding:0px 70px; color: #FFFFFF; background-color: rgba(255, 255, 255, 0); border-radius: 99px">
+                    {{ship.name}}
                   </x-button>
                 </div>
               </div>
@@ -57,11 +59,11 @@
             </popover>
             <!-- <p>其实这是一个下拉框<p>-->
             <!--<popover placement="bottom" style="margin:0px;">-->
-              <!--<div slot="content" class="popover-demo-content">-->
-                <!--<p>这里用来输出船的相关信息</p>-->
-              <!--</div>-->
-              <!--<button class="my-btn vux-header-right"><i style="opacity:0;color:white;font-size:20px "-->
-                                                         <!--class="el-icon-view"></i></button>-->
+            <!--<div slot="content" class="popover-demo-content">-->
+            <!--<p>这里用来输出船的相关信息</p>-->
+            <!--</div>-->
+            <!--<button class="my-btn vux-header-right"><i style="opacity:0;color:white;font-size:20px "-->
+            <!--class="el-icon-view"></i></button>-->
             <!--</popover>-->
           </div>
         </x-header>
@@ -70,18 +72,18 @@
         </div>
         <tabbar icon-class="vux-center" slot="bottom" style="background-color: rgb(240, 240, 243);"><!-- v-show="" -->
           <tabbar-item @click.native="cruiseShowToggle">
-            <img slot="icon" src="../static/image/首页图标/自主巡航.png" alt=""/>
-            <img slot="icon-active" src="../static/image/首页图标/自主巡航选中.png" alt=""/>
+            <img slot="icon" src="../static/img/home/cruise.png" alt=""/>
+            <img slot="icon-active" src="../static/img/home/cruiseSelected.png" alt=""/>
             <span slot="label">自主巡航</span>
           </tabbar-item>
           <tabbar-item @on-item-click="cleanShowToggle">
-            <img slot="icon" src="../static/image/首页图标/智能清洁.png" alt=""/>
-            <img slot="icon-active" src="../static/image/首页图标/智慧清洁选中.png" alt=""/>
+            <img slot="icon" src="../static/img/home/clean.png" alt=""/>
+            <img slot="icon-active" src="../static/img/home/cleanSelected.png" alt=""/>
             <span slot="label">智慧清洁</span>
           </tabbar-item>
           <tabbar-item @on-item-click="detectShowToggle">
-            <img slot="icon" src="../static/image/首页图标/水质检测.png" alt=""/>
-            <img slot="icon-active" src="../static/image/首页图标/水质检测选中.png" alt=""/>
+            <img slot="icon" src="../static/img/home/detect.png" alt=""/>
+            <img slot="icon-active" src="../static/img/home/detectSelected.png" alt=""/>
             <span slot="label">水质监测</span>
           </tabbar-item>
         </tabbar>
@@ -97,7 +99,6 @@
         <p style="text-align:center;">Are you sure?</p>
       </confirm>
     </div>
-
   </div>
 </template>
 
@@ -118,11 +119,10 @@
     TransferDom,
     XButton
   } from 'vux'
-  // import Drawer from '@/components/drawer.vue'
   import {getCookie} from './utils/cookie'
-  import {changeShip} from "./utils/socket";
+  import {changeShip} from './utils/socket';
+  import login from './views/login';
   import store from './store'
-
 
   export default {
     name: 'App',
@@ -139,7 +139,8 @@
       Popover,
       Checklist,
       Confirm,
-      XButton
+      XButton,
+      login
     },
     data() {
       return {
@@ -156,9 +157,8 @@
         show: false,
         //present:0,
         temp: 0,
-
         img: {
-          backgroundImage: "url(" + require("../static/image/首页图标/首页背景.png") + ") ",
+          backgroundImage: "url(" + require("../static/img/home/homeBack.png") + ") ",
           backgroundRepeat: "no-repeat",
           backgroundSize: "100%",
           width: "100%",
@@ -237,7 +237,7 @@
       },
       created() {
         this.$router.options.routes.forEach(route => {
-          console.log(route.path);
+          // console.log(route.path);
           this.items.push({
             name: route.name,
             path: route.path,
@@ -348,7 +348,7 @@
   }
 
   .head {
-    background: url("../static/image/background.png") !important;
+    background: url("../static/img/background.png") !important;
     height: 2.2rem !important; /* 260/75 */
     width: 250px !important;
     max-width: 250px !important;
@@ -390,15 +390,28 @@
     outline: 0;
   }
 
-  .vpopover,.vux-popover.v-transfer-dom{
+  .vpopover, .vux-popover.v-transfer-dom {
     border-radius: 20px;
     margin-left: 0px;
   }
 
-  .vpopover,.weui-btn.weui-btn_default:after{
+  .vpopover, .weui-btn.weui-btn_default:after {
     border: 1px none rgba(0, 0, 0, 0.2);
   }
-  #vux_view_box_body{
+
+  #vux_view_box_body {
     overflow: hidden;
   }
+
+  /*.scroller-mask{*/
+  /*top: -38px;*/
+  /*}*/
+
+  /*.scroller-indicator{*/
+  /*top: 65px;*/
+  /*}*/
+
+  /*.weui-btn.weui-btn_primary{*/
+  /*margin-top: -20px;*/
+  /*}*/
 </style>
